@@ -11,5 +11,5 @@ Usage:
     inv = digital_cells.inv_1(IhpLogicParams())
 """
 
-from . import stdcells
+from . import stdcells as stdcells
 from .stdcells import *

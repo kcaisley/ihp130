@@ -1,6 +1,5 @@
 # Std-Lib Imports
 from copy import deepcopy
-from typing import List
 
 # Hdl21 Imports
 import hdl21 as h

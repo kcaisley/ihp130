@@ -21,7 +21,7 @@ Target devices for conversion from `hdl21.Primitive`:
 
 # Std-Lib Imports
 from pathlib import Path
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Optional
 
 # Hdl21 Imports
 import hdl21 as h
@@ -68,11 +68,19 @@ class Install(PdkInstallation):
 
     Attributes:
         pdk_path: Path to the IHP-Open-PDK installation (ihp-sg13g2 directory).
-        model_lib: Relative path to the ngspice models directory.
+        model_lib: Relative path to the low-voltage MOS Spectre models.
     """
 
-    pdk_path: Path  # Path to PDK installation (ihp-sg13g2)
-    model_lib: Path  # Relative path to ngspice/models directory
+    pdk_path: Path  # Path to PDK installation (IHP-SG13G2)
+    model_lib: Path = Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2")
+
+    LOCAL_SPICE_FILES: ClassVar[list[Path]] = [
+        Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2/cornerMOSlv_psp.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2/cornerMOShv_psp.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13G2_HBT/HICUM/spectre/SG13G2_cornerBIP_hicum.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerRES.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerCAP.scs"),
+    ]
 
     SUPPLY_RAILS: ClassVar[dict[str, dict[str, float]]] = {
         "VDD": {"nominal": 1.2, "min": 1.08, "max": 1.32},
@@ -111,7 +119,7 @@ class Install(PdkInstallation):
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerMOSlv.lib",
+            path=self.pdk_path / self.model_lib / "cornerMOSlv_psp.scs",
             section=corner_map[corner],
         )
 
@@ -134,7 +142,7 @@ class Install(PdkInstallation):
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerMOShv.lib",
+            path=self.pdk_path / self.model_lib / "cornerMOShv_psp.scs",
             section=corner_map[corner],
         )
 
@@ -149,15 +157,15 @@ class Install(PdkInstallation):
             h.sim.Lib: The model library include for HBT devices.
         """
         corner_map: dict[h.pdk.Corner, str] = {
-            h.pdk.Corner.TYP: "tt",
-            h.pdk.Corner.FAST: "ff",
-            h.pdk.Corner.SLOW: "ss",
+            h.pdk.Corner.TYP: "typ",
+            h.pdk.Corner.FAST: "bcs",
+            h.pdk.Corner.SLOW: "wcs",
         }
         if not isinstance(corner, h.pdk.Corner) or corner not in corner_map:
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerHBT.lib",
+            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13G2_HBT/HICUM/spectre/SG13G2_cornerBIP_hicum.scs",
             section=corner_map[corner],
         )
 
@@ -172,15 +180,15 @@ class Install(PdkInstallation):
             h.sim.Lib: The model library include for resistor devices.
         """
         corner_map: dict[h.pdk.Corner, str] = {
-            h.pdk.Corner.TYP: "tt",
-            h.pdk.Corner.FAST: "ff",
-            h.pdk.Corner.SLOW: "ss",
+            h.pdk.Corner.TYP: "typ",
+            h.pdk.Corner.FAST: "bcs",
+            h.pdk.Corner.SLOW: "wcs",
         }
         if not isinstance(corner, h.pdk.Corner) or corner not in corner_map:
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerRES.lib",
+            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerRES.scs",
             section=corner_map[corner],
         )
 
@@ -195,15 +203,15 @@ class Install(PdkInstallation):
             h.sim.Lib: The model library include for capacitor devices.
         """
         corner_map: dict[h.pdk.Corner, str] = {
-            h.pdk.Corner.TYP: "tt",
-            h.pdk.Corner.FAST: "ff",
-            h.pdk.Corner.SLOW: "ss",
+            h.pdk.Corner.TYP: "typ",
+            h.pdk.Corner.FAST: "bcs",
+            h.pdk.Corner.SLOW: "wcs",
         }
         if not isinstance(corner, h.pdk.Corner) or corner not in corner_map:
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerCAP.lib",
+            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerCAP.scs",
             section=corner_map[corner],
         )
 
@@ -246,11 +254,11 @@ class IhpWalker(h.HierarchyWalker):
     def __init__(self):
         super().__init__()
         # Caches of our external module calls
-        self.mos_modcalls = dict()
-        self.res_modcalls = dict()
-        self.cap_modcalls = dict()
-        self.diode_modcalls = dict()
-        self.bjt_modcalls = dict()
+        self.mos_modcalls = {}
+        self.res_modcalls = {}
+        self.cap_modcalls = {}
+        self.diode_modcalls = {}
+        self.bjt_modcalls = {}
 
     def visit_primitive_call(self, call: h.PrimitiveCall) -> h.Instantiable:
         """Replace instances of `h.Primitive` with IHP `ExternalModule`s."""
@@ -280,8 +288,8 @@ class IhpWalker(h.HierarchyWalker):
         # If model name is specified directly, look it up
         if params.model is not None:
             try:
-                return [v for k, v in xtors.items() if params.model in k][0]
-            except IndexError:
+                return next(v for k, v in xtors.items() if params.model in k)
+            except StopIteration:
                 msg = f"No Mos module for model name {params.model}"
                 raise RuntimeError(msg)
 

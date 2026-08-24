@@ -19,8 +19,6 @@ Usage:
     ihp_hdl21.compile(MyInverter)
 """
 
-from typing import Optional
-
 from hdl21.pdk import register
 
 # Grab our primary PDK-definition module

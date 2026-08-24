@@ -7,7 +7,6 @@ ExternalModule instances representing the actual PDK devices.
 
 # Std-Lib Imports
 from dataclasses import dataclass, field
-from typing import Dict, Tuple
 
 # Hdl21 Imports
 import hdl21 as h
