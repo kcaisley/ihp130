@@ -6,8 +6,8 @@ import hdl21 as h
 import pytest
 
 from pdk import ihp130
-from pdk.ihp130 import site
-from pdk.ihp130.primitives.prim_dicts import default_xtor_size, xtors
+from pdk.ihp130.hdl21 import site
+from pdk.ihp130.hdl21.primitives.prim_dicts import default_xtor_size, xtors
 
 _MOS_VARIANTS = tuple(
     (mos_type, mos_vth, mos_family, module.name) for (_, mos_type, mos_vth, mos_family), module in xtors.items()

@@ -84,8 +84,8 @@
    <read-lef-with-def>true</read-lef-with-def>
    <macro-resolution-mode>default</macro-resolution-mode>
    <separate-groups>false</separate-groups>
-   <map-file>/home/kcaisley/libs/IHP-Open-PDK/ihp-sg13g2/libs.tech/klayout/tech/sg13g2.map</map-file>
-   <lef-files></lef-files>
+   <map-file>ihp130.map</map-file>
+   <lef-files>../openroad/sg13g2_tech.lef</lef-files>
   </lefdef>
   <mebes>
    <invert>false</invert>

@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Containment only: the exact enclosures are the foundry deck's.
+rules:
+  - id: FRIDA.V1.lower
+    check: min_enclosure
+    layers: [Metal1, Via1]
+    value: 0.0
+  - id: FRIDA.V1.upper
+    check: min_enclosure
+    layers: [Metal2, Via1]
+    value: 0.0
+  - id: FRIDA.V2.lower
+    check: min_enclosure
+    layers: [Metal2, Via2]
+    value: 0.0
+  - id: FRIDA.V2.upper
+    check: min_enclosure
+    layers: [Metal3, Via2]
+    value: 0.0
+  - id: FRIDA.V3.lower
+    check: min_enclosure
+    layers: [Metal3, Via3]
+    value: 0.0
+  - id: FRIDA.V3.upper
+    check: min_enclosure
+    layers: [Metal4, Via3]
+    value: 0.0
+  - id: FRIDA.V4.lower
+    check: min_enclosure
+    layers: [Metal4, Via4]
+    value: 0.0
+  - id: FRIDA.V4.upper
+    check: min_enclosure
+    layers: [Metal5, Via4]
+    value: 0.0
+  - id: FRIDA.V5.lower
+    check: min_enclosure
+    layers: [Metal5, Via5]
+    value: 0.0
+  - id: FRIDA.V5.upper
+    check: min_enclosure
+    layers: [Metal6, Via5]
+    value: 0.0
+  - id: FRIDA.V6.lower
+    check: min_enclosure
+    layers: [Metal6, Via6]
+    value: 0.0
+  - id: FRIDA.V6.upper
+    check: min_enclosure
+    layers: [Metal7, Via6]
+    value: 0.0

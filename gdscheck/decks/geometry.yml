@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Areas are 1e-6 um2 below the rule: gdscheck compares them in floating point.
+rules:
+  - id: FRIDA.M1.width
+    check: min_width
+    layers: [Metal1]
+    value: 0.16
+  - id: FRIDA.M1.space
+    check: min_space
+    layers: [Metal1]
+    value: 0.18
+  - id: FRIDA.M1.area
+    check: min_area
+    layers: [Metal1]
+    value: 0.089999
+  - id: FRIDA.M2.width
+    check: min_width
+    layers: [Metal2]
+    value: 0.2
+  - id: FRIDA.M2.space
+    check: min_space
+    layers: [Metal2]
+    value: 0.21
+  - id: FRIDA.M2.area
+    check: min_area
+    layers: [Metal2]
+    value: 0.143999
+  - id: FRIDA.M3.width
+    check: min_width
+    layers: [Metal3]
+    value: 0.2
+  - id: FRIDA.M3.space
+    check: min_space
+    layers: [Metal3]
+    value: 0.21
+  - id: FRIDA.M3.area
+    check: min_area
+    layers: [Metal3]
+    value: 0.143999
+  - id: FRIDA.M4.width
+    check: min_width
+    layers: [Metal4]
+    value: 0.2
+  - id: FRIDA.M4.space
+    check: min_space
+    layers: [Metal4]
+    value: 0.21
+  - id: FRIDA.M4.area
+    check: min_area
+    layers: [Metal4]
+    value: 0.143999
+  - id: FRIDA.M5.width
+    check: min_width
+    layers: [Metal5]
+    value: 0.2
+  - id: FRIDA.M5.space
+    check: min_space
+    layers: [Metal5]
+    value: 0.21
+  - id: FRIDA.M5.area
+    check: min_area
+    layers: [Metal5]
+    value: 0.143999
+  - id: FRIDA.M6.width
+    check: min_width
+    layers: [Metal6]
+    value: 1.64
+  - id: FRIDA.M6.space
+    check: min_space
+    layers: [Metal6]
+    value: 1.64
+  - id: FRIDA.M7.width
+    check: min_width
+    layers: [Metal7]
+    value: 2
+  - id: FRIDA.M7.space
+    check: min_space
+    layers: [Metal7]
+    value: 2
+  - id: FRIDA.V1.width
+    check: min_width
+    layers: [Via1]
+    value: 0.19
+  - id: FRIDA.V1.space
+    check: min_space
+    layers: [Via1]
+    value: 0.22
+  - id: FRIDA.V2.width
+    check: min_width
+    layers: [Via2]
+    value: 0.19
+  - id: FRIDA.V2.space
+    check: min_space
+    layers: [Via2]
+    value: 0.22
+  - id: FRIDA.V3.width
+    check: min_width
+    layers: [Via3]
+    value: 0.19
+  - id: FRIDA.V3.space
+    check: min_space
+    layers: [Via3]
+    value: 0.22
+  - id: FRIDA.V4.width
+    check: min_width
+    layers: [Via4]
+    value: 0.19
+  - id: FRIDA.V4.space
+    check: min_space
+    layers: [Via4]
+    value: 0.22
+  - id: FRIDA.V5.width
+    check: min_width
+    layers: [Via5]
+    value: 0.42
+  - id: FRIDA.V5.space
+    check: min_space
+    layers: [Via5]
+    value: 0.42
+  - id: FRIDA.V6.width
+    check: min_width
+    layers: [Via6]
+    value: 0.9
+  - id: FRIDA.V6.space
+    check: min_space
+    layers: [Via6]
+    value: 1.06

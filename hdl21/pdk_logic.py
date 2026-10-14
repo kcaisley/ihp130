@@ -57,6 +57,12 @@ from .pdk_data import (
 from .primitives.prim_dicts import *
 
 
+# The widest MOS finger each row-cell type fits (pdk/ihp130/layout/tech.py: W_MAX for the analog
+# cells), in unit widths (default_xtor_size: 350 nm). Generators that place their devices in
+# these cells read this through hdl21.pdk.default() and size every finger in whole units.
+MOS_FINGER_UNITS = {"analog": 6, "logic_n": 2, "logic_p": 3}
+
+
 @dataclass
 class Install(PdkInstallation):
     """
@@ -259,6 +265,14 @@ class IhpWalker(h.HierarchyWalker):
         self.cap_modcalls = {}
         self.diode_modcalls = {}
         self.bjt_modcalls = {}
+
+    def visit_external_module_call(self, call: h.ExternalModuleCall) -> h.Instantiable:
+        """Generic logic cells (inverter, nor2, nand2) become SG13G2 standard cells."""
+        if call.module.domain == "generic" and call.module.name in ("inverter", "nor2", "nand2"):
+            from .logic import logic_cell
+
+            return logic_cell(call.module.name, call.params)
+        return call
 
     def visit_primitive_call(self, call: h.PrimitiveCall) -> h.Instantiable:
         """Replace instances of `h.Primitive` with IHP `ExternalModule`s."""

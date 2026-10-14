@@ -22,8 +22,8 @@ Usage:
 from hdl21.pdk import register
 
 # Grab our primary PDK-definition module
-from . import pdk_logic
-from .pdk_logic import *
+from .hdl21 import pdk_logic
+from .hdl21.pdk_logic import *
 
 # The optional external-data installation.
 # Set by an instantiator of `Install`, if available.

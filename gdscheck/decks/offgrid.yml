@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+
+rules:
+  - id: FRIDA.grid
+    check: offgrid
+    layers: [Metal1, Via1, Metal2, Via2, Metal3, Via3, Metal4, Via4, Metal5, Via5, Metal6, Via6, Metal7, PrBoundary]
+    value: 0.005
