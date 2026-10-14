@@ -22,6 +22,8 @@ DECK = (
 
 
 def lvs(gds: Path, top: str, source: Path, source_top: str, run_dir: Path) -> tuple[bool, Path]:
+    if not (DECK / "run_lvs.py").is_file():
+        raise FileNotFoundError(f"no IHP LVS deck at {DECK}: set IHP_OPEN_PDK to a full IHP-Open-PDK checkout")
     run_dir.mkdir(parents=True, exist_ok=True)
     renamed = run_dir / "source.cdl"
     renamed.write_text(

@@ -26,7 +26,9 @@ def subckts(names: set[str]) -> list[str]:
     return out
 
 
-def main(src: str, dst: str) -> None:
+def lvs_source(src: str | Path, dst: str | Path) -> None:
+    """Write the LVS source for the netlist ``src`` to ``dst``."""
+
     lines, cells = [], set()
     for line in Path(src).read_text().splitlines():
         f = line.split()
@@ -38,4 +40,4 @@ def main(src: str, dst: str) -> None:
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:3])
+    lvs_source(*sys.argv[1:3])

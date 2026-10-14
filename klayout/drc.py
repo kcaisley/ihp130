@@ -22,8 +22,15 @@ DECK = (
 
 
 def drc(gds: Path, top: str, run_dir: Path) -> dict[str, int]:
+    """The violated rules and their counts; raises when the deck is missing or writes no report
+    (run_drc.py exits nonzero on violations too, so its report decides)."""
+
+    if not (DECK / "run_drc.py").is_file():
+        raise FileNotFoundError(f"no IHP DRC deck at {DECK}: set IHP_OPEN_PDK to a full IHP-Open-PDK checkout")
     run_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
+    for old in run_dir.glob("*.lyrdb"):
+        old.unlink()
+    done = subprocess.run(
         [
             sys.executable,
             str(DECK / "run_drc.py"),
@@ -35,9 +42,14 @@ def drc(gds: Path, top: str, run_dir: Path) -> dict[str, int]:
         ],
         check=False,
         capture_output=True,
+        text=True,
     )
+    (run_dir / "run_drc.log").write_text(done.stdout + done.stderr)
+    reports = list(run_dir.glob("*.lyrdb"))
+    if not reports:
+        raise RuntimeError(f"KLayout DRC wrote no report; see {run_dir / 'run_drc.log'}")
     counts: Counter[str] = Counter()
-    for f in run_dir.glob("*.lyrdb"):
+    for f in reports:
         db = rdb.ReportDatabase("")
         db.load(str(f))
         for item in db.each_item():
