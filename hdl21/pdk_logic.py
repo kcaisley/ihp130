@@ -88,6 +88,11 @@ class Install(PdkInstallation):
         Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerCAP.scs"),
     ]
 
+    def include_stdcell(self) -> h.sim.Include:
+        """Include the sg13g2 standard cells' SPICE (this package's copy, which the row cells draw
+        from); transistor models must be included separately."""
+        return h.sim.Include(path=Path(__file__).resolve().parents[1] / "openroad/sp/sg13g2_stdcell.sp")
+
     SUPPLY_RAILS: ClassVar[dict[str, dict[str, float]]] = {
         "VDD": {"nominal": 1.2, "min": 1.08, "max": 1.32},
         "VDDIO": {"nominal": 3.3, "min": 3.0, "max": 3.6},
