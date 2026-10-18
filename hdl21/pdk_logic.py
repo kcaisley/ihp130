@@ -272,11 +272,15 @@ class IhpWalker(h.HierarchyWalker):
         self.bjt_modcalls = {}
 
     def visit_external_module_call(self, call: h.ExternalModuleCall) -> h.Instantiable:
-        """Generic logic cells (inverter, nor2, nand2) become SG13G2 standard cells."""
+        """Generic logic cells (inverter, nor2, nand2) and the clock XOR become SG13G2 standard cells."""
         if call.module.domain == "generic" and call.module.name in ("inverter", "nor2", "nand2"):
             from .logic import logic_cell
 
             return logic_cell(call.module.name, call.params)
+        if call.module.domain == "generic" and call.module.name == "clock_xor":
+            from .logic import clock_xor
+
+            return clock_xor(call.params)
         return call
 
     def visit_primitive_call(self, call: h.PrimitiveCall) -> h.Instantiable:
