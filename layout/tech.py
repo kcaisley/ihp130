@@ -19,6 +19,8 @@ LAYERS = {
     "M3": (30, 0),
     "NW": (31, 0),
     "PP": (14, 0),  # pSD
+    "SALBLOCK": (28, 0),  # SalBlock: silicide block
+    "POLYRES": (128, 0),  # PolyRes: poly resistor marker
     "NP": None,  # nSD is not drawn
     "VTN": None,
     "VTP": None,
@@ -46,9 +48,15 @@ DBU = 0.001  # um per database unit (1 nm)
 # cuts. Rules the LEF holds only in tables (enclosures, conditional spacing) are left out.
 RULES = {
     "M1": {"width": 160, "space": 180, "pitch": 420, "area": 90_000},
-    **{f"V{n}": {"cut": 190, "space": 220} for n in range(1, 5)},
-    **{f"M{n}": {"width": 200, "space": 210, "pitch": 480, "area": 144_000} for n in (2, 4)},
-    **{f"M{n}": {"width": 200, "space": 210, "pitch": 420, "area": 144_000} for n in (3, 5)},
+    # enclosure: (on two opposite sides, on the other two, on all four), the PDK's via rules (an end
+    # cap of 50 nm, 10 nm elsewhere); enclosed_area: the LEF gives none, a conservative 1 um2
+    **{f"V{n}": {"cut": 190, "space": 220, "enclosure": (50, 10, 10)} for n in range(1, 5)},
+    **{
+        f"M{n}": {"width": 200, "space": 210, "pitch": 480, "area": 144_000, "enclosed_area": 1_000_000} for n in (2, 4)
+    },
+    **{
+        f"M{n}": {"width": 200, "space": 210, "pitch": 420, "area": 144_000, "enclosed_area": 1_000_000} for n in (3, 5)
+    },
     "V5": {"cut": 420, "space": 420},
     "M6": {"width": 1640, "space": 1640, "pitch": 2280},
     "V6": {"cut": 900, "space": 1060},
@@ -123,3 +131,25 @@ ALIGN_ROUTER = "hanan"  # ALIGN's router: its default (astar) leaves long nets a
 LAYGO_CLEAR = 210  # laygo: a bar's end to a pin bar booked END wider (Mn.b)
 LAYGO_LINE_END = False  # no dense line-end rule
 LAYGO_GAP3 = 500  # laygo: M3 segments booked by their via centres, drawn BAR_END further: 2 BAR_END + Mn.b
+
+# the metals a fringe MOM capacitor stacks (flow/momcap), from the top: the upper uniform thin
+# metals at their minimum width and space; an N-layer unit uses the top N, its shield the metal
+# below them
+MOM_LAYERS = (3, 4, 5)
+
+# the unsilicided P+ poly resistor rppd (flow/layout/stems/rescell.py): its LVS device (PolyRes,
+# pSD and SalBlock over GatPoly) and model (rsh 260, weff = w + 6 nm, rz 35 ohm um per head); Rppd.a
+# (width); PolyRes marks the body, SalBlock 0.2 past it on every side (Sal.c) and 0.2 from the
+# contacts (Sal.d); pSD past the resistor (pSD.n, Rppd.b); Cnt.d
+RES = {
+    "model": "rppd",
+    "sheet": 260.0,
+    "dw": -6,
+    "end": 70.0,
+    "width": 500,
+    "markers": {"SALBLOCK": (200, 200), "POLYRES": (0, 0)},
+    "implant": ("PP", 200),
+    "co_space": 400,
+    "co_enc": 70,
+    "cdl": "R{name} {plus} {minus} rppd m=1 l={l}u w={w}u",  # as the deck's own test netlists
+}
