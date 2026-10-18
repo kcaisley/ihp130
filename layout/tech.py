@@ -173,3 +173,8 @@ MOM_MODEL = {
     ("strip", 2): ((210, 0.2506, 0.062), (315, 0.1793, 0.0466), (420, 0.1402, 0.0386), (630, 0.0981, 0.028)),
     ("strip", 3): ((210, 0.3777, 0.1175), (315, 0.2708, 0.0916), (420, 0.2129, 0.0763), (630, 0.1499, 0.0553)),
 }
+
+# the CDAC's capacitance against MOM_MODEL's per stacked-metal count: the median over the stages of
+# the extracted radix-17 array (caparray_extract_all_pdks, 2026-10-18) over the model's sizing (its
+# shield mesh couples otherwise than the test structures' solid plate); mom_array_params scales by it
+MOM_ARRAY_SCALE = {1: 0.9974, 2: 0.9627, 3: 0.9578}
