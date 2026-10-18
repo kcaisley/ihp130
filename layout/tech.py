@@ -153,7 +153,9 @@ RES = {
     "implant": ("PP", 200),
     "co_space": 200,
     "co_enc": 70,
-    "cdl": "R{name} {plus} {minus} rppd m=1 l={l}u w={w}u",  # as the deck's own test netlists
+    "cdl": "R{name} {plus} {minus} rppd m=1 l={l}u w={w}u",
+    "bulk": True,  # the model's third terminal, the substrate
+    "sim_model": "res_rppd",  # the simulation library's name for it  # as the deck's own test netlists
 }
 
 # FMOM capacitance per (style, stacked metals): rows (plate spacing nm, slope fF/um, intercept
