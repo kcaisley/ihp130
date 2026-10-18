@@ -153,3 +153,19 @@ RES = {
     "co_enc": 70,
     "cdl": "R{name} {plus} {minus} rppd m=1 l={l}u w={w}u",  # as the deck's own test netlists
 }
+
+# FMOM capacitance per (style, stacked metals): rows (plate spacing nm, slope fF/um, intercept
+# fF), C = slope * L + intercept, at 1, 1.5, 2 and 3 times the metals' minimum spacing. Estimated,
+# not extracted (no 3D extraction deck for this kit): the alpha / s + beta fits of the 65 and 180 nm extractions, geometric in log(node)
+# (flow/momcap readme); generators interpolate in 1 / spacing at the spacing they draw
+MOM_MODEL = {
+    ("difference", 1): ((210, 0.1929, 0.0572), (315, 0.1379, 0.0572), (420, 0.11, 0.0572), (630, 0.0815, 0.0572)),
+    ("difference", 2): ((210, 0.3946, 0.1411), (315, 0.2847, 0.1411), (420, 0.2291, 0.1411), (630, 0.1726, 0.1411)),
+    ("difference", 3): ((210, 0.5946, 0.227), (315, 0.4297, 0.227), (420, 0.3463, 0.227), (630, 0.2617, 0.227)),
+    ("ring", 1): ((210, 0.1905, 0.0879), (315, 0.1371, 0.0879), (420, 0.1101, 0.0879), (630, 0.0825, 0.0879)),
+    ("ring", 2): ((210, 0.3908, 0.2155), (315, 0.2839, 0.2155), (420, 0.2299, 0.2155), (630, 0.1749, 0.2155)),
+    ("ring", 3): ((210, 0.5895, 0.3422), (315, 0.4288, 0.3422), (420, 0.3475, 0.3422), (630, 0.265, 0.3422)),
+    ("strip", 1): ((210, 0.105, 0.0055), (315, 0.0741, 0.0055), (420, 0.0585, 0.0055), (630, 0.0425, 0.0055)),
+    ("strip", 2): ((210, 0.2139, 0.0366), (315, 0.1526, 0.0366), (420, 0.1215, 0.0366), (630, 0.09, 0.0366)),
+    ("strip", 3): ((210, 0.3212, 0.0709), (315, 0.2297, 0.0709), (420, 0.1834, 0.0709), (630, 0.1364, 0.0709)),
+}
