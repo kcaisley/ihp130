@@ -21,6 +21,7 @@ LAYERS = {
     "PP": (14, 0),  # pSD
     "SALBLOCK": (28, 0),  # SalBlock: silicide block
     "POLYRES": (128, 0),  # PolyRes: poly resistor marker
+    "EXTBLOCK": (111, 0),  # EXTBlock: with PolyRes, marks a poly resistor for LVS
     "NP": None,  # nSD is not drawn
     "VTN": None,
     "VTP": None,
@@ -139,17 +140,18 @@ MOM_LAYERS = (3, 4, 5)
 
 # the unsilicided P+ poly resistor rppd (flow/layout/stems/rescell.py): its LVS device (PolyRes,
 # pSD and SalBlock over GatPoly) and model (rsh 260, weff = w + 6 nm, rz 35 ohm um per head); Rppd.a
-# (width); PolyRes marks the body, SalBlock 0.2 past it on every side (Sal.c) and 0.2 from the
-# contacts (Sal.d); pSD past the resistor (pSD.n, Rppd.b); Cnt.d
+# (width); PolyRes marks the body, SalBlock the body and 0.2 past the poly across it (Sal.c), the
+# contacts 0.2 from it (Sal.d), EXTBlock over the whole resistor as its pSD (PolyRes and EXTBlock
+# mark the device), as the kit's own LVS test layouts; pSD past the resistor (pSD.n, Rppd.b); Cnt.d
 RES = {
     "model": "rppd",
     "sheet": 260.0,
     "dw": -6,
     "end": 70.0,
     "width": 500,
-    "markers": {"SALBLOCK": (200, 200), "POLYRES": (0, 0)},
+    "markers": {"SALBLOCK": (0, 200), "POLYRES": (0, 0), "EXTBLOCK": (630, 200)},
     "implant": ("PP", 200),
-    "co_space": 400,
+    "co_space": 200,
     "co_enc": 70,
     "cdl": "R{name} {plus} {minus} rppd m=1 l={l}u w={w}u",  # as the deck's own test netlists
 }
