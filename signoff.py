@@ -72,3 +72,40 @@ def run_lvs(
     """KLayout LVS in ``lvs/``: whether the netlists match, and its log."""
 
     return lvs(gds_path, layout_top, source_path, source_top, run_dir / "lvs")
+
+
+KIT = Path("/eda/kits/IHP/IHP-SG13G2/SG13G2_618_rev1.2.10")
+
+
+def run_layout_pex(*, run_dir: Path, gds_path: Path, layout_top: str, output_stem: str) -> Path:
+    """3D xACT of a layout by its own net names (``flow.layout.calibre_pex``), in ``pex/``: the kit's
+    Calibre xRC rules (its LVS connectivity, the capacitance and resistance rules), their template
+    setup commented out."""
+
+    from flow.layout.calibre_pex import run_layout_pex as extract
+    from flow.layout.calibre_pex import specialize
+
+    work = (run_dir / "pex").resolve()
+    work.mkdir(parents=True, exist_ok=True)
+    lvs = specialize(
+        KIT / "Calibre/RSF/lvs.tvf",
+        work / "lvs.tvf",
+        (
+            (' tvf::LAYOUT PRIMARY "__TOP_CELL__"', " # set by FRIDA's control file: LAYOUT PRIMARY"),
+            (" tvf::LAYOUT SYSTEM GDSII", " # set by FRIDA's control file: LAYOUT SYSTEM"),
+        ),
+    )
+    xrc = specialize(
+        KIT / "Calibre/RSF/xrc.tvf",
+        work / "xrc.tvf",
+        (("source $env(IHP_TECH)/Calibre/RSF/lvs.tvf", f"source {lvs}"),),
+    )
+    return extract(
+        run_dir=work,
+        gds_path=gds_path,
+        layout_top=layout_top,
+        output_stem=output_stem,
+        deck=f'source "{xrc}"\n',
+        environment={"IHP_TECH": str(KIT)},
+        deck_sets=("ERC RESULTS",),  # the LVS rules set their own
+    )
