@@ -23,6 +23,9 @@ else:
     STD_GDS = _COPY / "gds/sg13g2_stdcell.gds.gz"
     STD_SPICE = _COPY / "sp/sg13g2_stdcell.sp"
     STD_LEF = _COPY / "lef/sg13g2_stdcell.lef"
+# the library's Liberty (typical corner: its cells, pins and functions are every corner's), which
+# flow.circuit.cellmap reads for the hdl21 cell library
+STD_LIBERTY = _COPY / "lib/sg13g2_stdcell_typ_1p20V_25C.lib.gz"
 ACCESS_JSON = Path(
     os.environ.get("STEMS_ACCESS", Path(__file__).resolve().parents[3] / "build/layout/stems/sg13g2_access.json")
 )

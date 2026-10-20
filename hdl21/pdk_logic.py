@@ -273,6 +273,13 @@ class IhpWalker(h.HierarchyWalker):
 
     def visit_external_module_call(self, call: h.ExternalModuleCall) -> h.Instantiable:
         """Generic logic cells (inverter, nor2, nand2) and the clock XOR become SG13G2 standard cells."""
+        from flow.circuit.cells import substitute
+
+        from . import cells
+
+        wrapper = substitute(call, cells)  # a generic cell (flow.circuit.cells): its library cell
+        if wrapper is not None:
+            return wrapper
         if call.module.domain == "generic" and call.module.name in ("inverter", "nor2", "nand2"):
             from .logic import logic_cell
 

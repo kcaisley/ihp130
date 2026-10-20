@@ -41,6 +41,7 @@ LAYER_NAMES = {f"M{n}": f"Metal{n}" for n in range(1, 6)}  # the layer map's nam
 PIN_TEXT = {"M1": (8, 25), "M2": (10, 25), "M3": (30, 25)}  # Metal<n>.text: pin labels
 MODELS = {"n": "sg13_lv_nmos", "p": "sg13_lv_pmos"}  # LVS device names of the row transistors
 STD_LIB = "sg13g2_stdcell"  # the standard-cell library
+STD_DRIVE = r"_(\d+)$"  # a cell name's drive strength (flow.circuit.cellmap)
 MFG_GRID = 5  # manufacturing grid
 DBU = 0.001  # um per database unit (1 nm)
 
