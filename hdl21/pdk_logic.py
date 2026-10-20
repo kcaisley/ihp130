@@ -110,12 +110,17 @@ class Install(PdkInstallation):
         },
     }
 
-    def simulation_includes(self, corner: h.pdk.Corner, simulator: str = "spectre") -> list:
+    def simulation_includes(self, corner: h.pdk.Corner, simulator: str = "spectre", mismatch: bool = False) -> list:
         """What a simulation of this package's devices and standard cells includes, in order, for
         ``simulator`` ("spectre", or "ngspice" in HSPICE compatibility). Spectre: the kit's model
         libraries at ``corner`` (MOS, HBT, resistors, capacitors, diodes), the package's device
         names on the kit's, the standard cells. ngspice: the open PDK's compiled Verilog-A models,
-        its model libraries at ``corner``, its standard-cell netlist."""
+        its model libraries at ``corner``, its standard-cell netlist. ``mismatch``: the same for
+        Spectre, whose corner sections carry the mismatch statistics a Monte Carlo
+        (``variations=mismatch``) varies; ngspice's are other sections (``mos_tt_mismatch``)."""
+
+        if mismatch and simulator != "spectre":
+            raise NotImplementedError("mismatch statistics: Spectre only")
 
         if simulator == "spectre":
             return [
