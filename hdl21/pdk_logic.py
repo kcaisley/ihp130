@@ -56,7 +56,6 @@ from .pdk_data import (
 )
 from .primitives.prim_dicts import *
 
-
 # The widest MOS finger each row-cell type fits (pdk/ihp130/layout/tech.py: W_MAX for the analog
 # cells), in unit widths (default_xtor_size: 350 nm). Generators that place their devices in
 # these cells read this through hdl21.pdk.default() and size every finger in whole units.
@@ -73,25 +72,90 @@ class Install(PdkInstallation):
     appropriate model files for different device types and process corners.
 
     Attributes:
-        pdk_path: Path to the IHP-Open-PDK installation (ihp-sg13g2 directory).
+        pdk_path: Path to the Cadence kit (IHP-SG13G2), whose models Spectre reads.
         model_lib: Relative path to the low-voltage MOS Spectre models.
+        open_pdk_path: Path to an IHP-Open-PDK checkout, whose models and standard-cell netlist
+            ngspice reads.
+        osdi_path: Directory of the open PDK's Verilog-A models (psp103, psp103_nqs, r3_cmc,
+            mosvar) compiled for ngspice (OpenVAF).
     """
 
     pdk_path: Path  # Path to PDK installation (IHP-SG13G2)
     model_lib: Path = Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2")
+    open_pdk_path: Path | None = None
+    osdi_path: Path | None = None
 
     LOCAL_SPICE_FILES: ClassVar[list[Path]] = [
         Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2/cornerMOSlv_psp.scs"),
         Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2/cornerMOShv_psp.scs"),
-        Path("SG13G2_618_rev1.2.10/tech/SG13G2_HBT/HICUM/spectre/SG13G2_cornerBIP_hicum.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13G2_HBT/VBIC/spectre/SG13G2_cornerBIP_vbic.scs"),
         Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerRES.scs"),
         Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerCAP.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/sg13g2_dschottky_nbl1_corner.scs"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13_ESD/spectre/SG13_esd.lib"),
+        Path("SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_diodes.lib"),
     ]
 
     def include_stdcell(self) -> h.sim.Include:
         """Include the sg13g2 standard cells' SPICE (this package's copy, which the row cells draw
         from); transistor models must be included separately."""
         return h.sim.Include(path=Path(__file__).resolve().parents[1] / "openroad/sp/sg13g2_stdcell.sp")
+
+    # what the site's model decks do not model, per simulator: a device, or "cells", and why
+    # (pdk/test_spice.py)
+    UNMODELED: ClassVar[dict[str, dict[str, str]]] = {
+        "spectre": {
+            name: "the kit has no HBT with its thermal node as a fifth pin (the open PDK's ngspice models do)"
+            for name in ("npn13G2_5t", "npn13G2l_5t", "npn13G2v_5t")
+        },
+    }
+
+    def simulation_includes(self, corner: h.pdk.Corner, simulator: str = "spectre") -> list:
+        """What a simulation of this package's devices and standard cells includes, in order, for
+        ``simulator`` ("spectre", or "ngspice" in HSPICE compatibility). Spectre: the kit's model
+        libraries at ``corner`` (MOS, HBT, resistors, capacitors, diodes), the package's device
+        names on the kit's, the standard cells. ngspice: the open PDK's compiled Verilog-A models,
+        its model libraries at ``corner``, its standard-cell netlist."""
+
+        if simulator == "spectre":
+            return [
+                self.include_mos_lv(corner),
+                self.include_mos_hv(corner),
+                self.include_hbt(corner),
+                self.include_res(corner),
+                self.include_cap(corner),
+                *self.include_diodes(corner),
+                self.include_devices(),
+                self.include_stdcell(),
+            ]
+        if simulator == "ngspice":
+            return self.ngspice_includes(corner)
+        raise ValueError(f"no {simulator} models for IHP SG13G2")
+
+    def ngspice_includes(self, corner: h.pdk.Corner) -> list:
+        """The open PDK's ngspice models at ``corner`` and its standard cells, after a control block
+        that loads the compiled Verilog-A models (ngspice runs its ``pre_`` commands before it reads
+        the circuit, whose PSP MOS, R3 resistors and varactors need them)."""
+
+        if self.open_pdk_path is None or self.osdi_path is None:
+            raise ValueError("IHP SG13G2's open PDK or its compiled Verilog-A models are not configured")
+        mos = {h.pdk.Corner.TYP: "tt", h.pdk.Corner.FAST: "ff", h.pdk.Corner.SLOW: "ss"}[corner]
+        case = {h.pdk.Corner.TYP: "typ", h.pdk.Corner.FAST: "bcs", h.pdk.Corner.SLOW: "wcs"}[corner]
+        models = self.open_pdk_path / "ihp-sg13g2/libs.tech/ngspice/models"
+        osdi = "".join(
+            f"pre_osdi {self.osdi_path / name}.osdi\n" for name in ("psp103", "psp103_nqs", "r3_cmc", "mosvar")
+        )
+        return [
+            h.sim.Literal(f".control\n{osdi}.endc"),
+            h.sim.Lib(path=models / "cornerMOSlv.lib", section=f"mos_{mos}"),
+            h.sim.Lib(path=models / "cornerMOShv.lib", section=f"mos_{mos}"),  # and the varactor
+            h.sim.Lib(path=models / "cornerHBT.lib", section=f"hbt_{case}"),
+            h.sim.Lib(path=models / "cornerRES.lib", section=f"res_{case}"),
+            h.sim.Lib(path=models / "cornerCAP.lib", section=f"cap_{case}"),
+            h.sim.Lib(path=models / "cornerDIO.lib", section=f"dio_{mos}"),  # ESD, Schottky, antennas
+            # the cells' X lines name the MOS subcircuits (the package's copy has M lines)
+            h.sim.Include(path=self.open_pdk_path / "ihp-sg13g2/libs.ref/sg13g2_stdcell/spice/sg13g2_stdcell.spice"),
+        ]
 
     SUPPLY_RAILS: ClassVar[dict[str, dict[str, float]]] = {
         "VDD": {"nominal": 1.2, "min": 1.08, "max": 1.32},
@@ -159,7 +223,9 @@ class Install(PdkInstallation):
 
     def include_hbt(self, corner: h.pdk.Corner) -> h.sim.Lib:
         """
-        Get the HBT model include for the specified process corner.
+        Get the HBT model include for the specified process corner: the kit's VBIC library,
+        whose npn13G2 takes the package's parameters (Nx, Ny; the HICUM one has no Ny) and which
+        alone has npn13G2l, npn13G2v and pnpMPA, as the open PDK's ngspice models do.
 
         Args:
             corner: The process corner (TYP, FAST, SLOW).
@@ -176,7 +242,7 @@ class Install(PdkInstallation):
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13G2_HBT/HICUM/spectre/SG13G2_cornerBIP_hicum.scs",
+            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13G2_HBT/VBIC/spectre/SG13G2_cornerBIP_vbic.scs",
             section=corner_map[corner],
         )
 
@@ -205,7 +271,9 @@ class Install(PdkInstallation):
 
     def include_cap(self, corner: h.pdk.Corner) -> h.sim.Lib:
         """
-        Get the capacitor model include for the specified process corner.
+        Get the capacitor model include for the specified process corner. The kit's cap_cmim
+        takes its capacitance from ``c`` (75.49 fF unless given), which the kit's CDF computes
+        from w and l; the open PDK's (ngspice) computes it from w and l itself.
 
         Args:
             corner: The process corner (TYP, FAST, SLOW).
@@ -225,6 +293,23 @@ class Install(PdkInstallation):
             path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13G2_PASSIVES/spectre/SG13_cornerCAP.scs",
             section=corner_map[corner],
         )
+
+    def include_diodes(self, corner: h.pdk.Corner) -> list:
+        """The kit's diode models: the Schottky diode at ``corner``, the ESD diodes and the
+        standard cells' antenna diodes (neither has corners)."""
+
+        section = {h.pdk.Corner.TYP: "tt", h.pdk.Corner.FAST: "ff", h.pdk.Corner.SLOW: "ss"}[corner]
+        tech = self.pdk_path / "SG13G2_618_rev1.2.10/tech"
+        return [
+            h.sim.Lib(path=tech / "SG13G2_PASSIVES/spectre/sg13g2_dschottky_nbl1_corner.scs", section=section),
+            h.sim.Include(path=tech / "SG13_ESD/spectre/SG13_esd.lib"),
+            h.sim.Include(path=tech / "SG13G2_PASSIVES/spectre/SG13_diodes.lib"),
+        ]
+
+    def include_devices(self) -> h.sim.Include:
+        """Spectre definitions of the package's device names (the open PDK's) that the kit names
+        otherwise, on the kit's devices; a simulation includes it after the model libraries."""
+        return h.sim.Include(path=Path(__file__).resolve().parent / "spectre_devices.scs")
 
     def include(self, corner: h.pdk.Corner) -> h.sim.Lib:
         """
@@ -471,10 +556,8 @@ class IhpWalker(h.HierarchyWalker):
         defaults = IhpDiodeParams.default_instance()
 
         if params.w is not None and params.l is not None:
-            # Calculate area and perimeter from w/l
-            area = params.w * params.l
-            pj = 2 * (params.w + params.l)
-            modparams = IhpDiodeParams(area=area, pj=pj, m=defaults.m)
+            # One anode of the given width and length
+            modparams = IhpDiodeParams(w=params.w, l=params.l, m=defaults.m)
         else:
             modparams = IhpDiodeParams()
 
@@ -510,8 +593,8 @@ class IhpWalker(h.HierarchyWalker):
         if "pnp" in mod.name.lower():
             defaults = IhpPnpParams.default_instance()
             modparams = IhpPnpParams(
-                w=defaults.w,
-                l=defaults.l,
+                a=defaults.a,
+                p=defaults.p,
                 m=int(params.mult) if params.mult is not None else defaults.m,
             )
         else:

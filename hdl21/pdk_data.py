@@ -3,6 +3,7 @@ from copy import deepcopy
 
 # Hdl21 Imports
 import hdl21 as h
+from hdl21.prefix import µ
 from hdl21.primitives import (
     Bipolar,
     Diode,
@@ -34,18 +35,18 @@ class IhpMosParams:
     """
     IHP SG13G2 Low-Voltage MOS Parameters.
 
-    These parameters match the sg13_lv_nmos/pmos subcircuit interface.
-    Units are in microns (µm) to match the PDK conventions.
+    These parameters match the sg13_lv_nmos/pmos subcircuit interface. Sizes are in
+    meters, as the models take them.
 
     Attributes:
-        w: Width in microns. Default is 0.35µm (minimum).
-        l: Length in microns. Default is 0.13µm (minimum for LV).
+        w: Width. Default is 0.35µm (minimum).
+        l: Length. Default is 0.13µm (minimum for LV).
         ng: Number of gate fingers. Default is 1.
         m: Multiplier. Default is 1.
     """
 
-    w = h.Param(dtype=h.Scalar, desc="Width in µm", default=0.35)
-    l = h.Param(dtype=h.Scalar, desc="Length in µm", default=0.13)
+    w = h.Param(dtype=h.Scalar, desc="Width", default=0.35 * µ)
+    l = h.Param(dtype=h.Scalar, desc="Length", default=0.13 * µ)
     ng = h.Param(dtype=h.Scalar, desc="Number of gate fingers", default=1)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
@@ -59,14 +60,14 @@ class IhpMosHvParams:
     Minimum length is 0.45µm for HV devices.
 
     Attributes:
-        w: Width in microns. Default is 0.35µm.
-        l: Length in microns. Default is 0.45µm (minimum for HV).
+        w: Width. Default is 0.35µm.
+        l: Length. Default is 0.45µm (minimum for HV).
         ng: Number of gate fingers. Default is 1.
         m: Multiplier. Default is 1.
     """
 
-    w = h.Param(dtype=h.Scalar, desc="Width in µm", default=0.35)
-    l = h.Param(dtype=h.Scalar, desc="Length in µm", default=0.45)
+    w = h.Param(dtype=h.Scalar, desc="Width", default=0.35 * µ)
+    l = h.Param(dtype=h.Scalar, desc="Length", default=0.45 * µ)
     ng = h.Param(dtype=h.Scalar, desc="Number of gate fingers", default=1)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
@@ -95,14 +96,17 @@ class IhpPnpParams:
     """
     IHP SG13G2 Lateral PNP (pnpMPA) Parameters.
 
+    The model's own (the kit's and the open PDK's): the emitter's area and perimeter, which a
+    drawn emitter of width w and length l gives as w * l and 2 * (w + l).
+
     Attributes:
-        w: Width in microns. Default is 1µm.
-        l: Length in microns. Default is 2µm.
+        a: Emitter area in m². Default is 2µm² (1µm by 2µm).
+        p: Emitter perimeter in m. Default is 6µm.
         m: Multiplier. Default is 1.
     """
 
-    w = h.Param(dtype=h.Scalar, desc="Width in µm", default=1.0)
-    l = h.Param(dtype=h.Scalar, desc="Length in µm", default=2.0)
+    a = h.Param(dtype=h.Scalar, desc="Emitter area in m²", default=2e-12)
+    p = h.Param(dtype=h.Scalar, desc="Emitter perimeter", default=6 * µ)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
 
@@ -114,13 +118,13 @@ class IhpResParams:
     For rsil, rhigh, and rppd resistors (3-terminal with bulk).
 
     Attributes:
-        w: Width in microns. Default is 0.5µm.
-        l: Length in microns. Default is 2.0µm.
+        w: Width. Default is 0.5µm.
+        l: Length. Default is 2.0µm.
         m: Multiplier. Default is 1.
     """
 
-    w = h.Param(dtype=h.Scalar, desc="Width in µm", default=0.5)
-    l = h.Param(dtype=h.Scalar, desc="Length in µm", default=2.0)
+    w = h.Param(dtype=h.Scalar, desc="Width", default=0.5 * µ)
+    l = h.Param(dtype=h.Scalar, desc="Length", default=2.0 * µ)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
 
@@ -132,13 +136,13 @@ class IhpCapParams:
     For cap_cmim and cap_rfcmim capacitors.
 
     Attributes:
-        w: Width in microns. Default is 6.0µm (minimum).
-        l: Length in microns. Default is 6.0µm (minimum).
+        w: Width. Default is 6.0µm (minimum).
+        l: Length. Default is 6.0µm (minimum).
         m: Multiplier. Default is 1.
     """
 
-    w = h.Param(dtype=h.Scalar, desc="Width in µm", default=6.0)
-    l = h.Param(dtype=h.Scalar, desc="Length in µm", default=6.0)
+    w = h.Param(dtype=h.Scalar, desc="Width", default=6.0 * µ)
+    l = h.Param(dtype=h.Scalar, desc="Length", default=6.0 * µ)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
 
@@ -150,31 +154,36 @@ class IhpVaricapParams:
     4-terminal varactor device (G1, W, G2, bn).
 
     Attributes:
-        w: Width in microns. Default is 1.0µm.
-        l: Length in microns. Default is 1.0µm.
+        w: Width. Default is 1.0µm.
+        l: Length. Default is 1.0µm.
         m: Multiplier. Default is 1.
     """
 
-    w = h.Param(dtype=h.Scalar, desc="Width in µm", default=1.0)
-    l = h.Param(dtype=h.Scalar, desc="Length in µm", default=1.0)
+    w = h.Param(dtype=h.Scalar, desc="Width", default=1.0 * µ)
+    l = h.Param(dtype=h.Scalar, desc="Length", default=1.0 * µ)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
 
 @h.paramclass
 class IhpDiodeParams:
     """
-    IHP SG13G2 Diode/ESD Parameters.
+    IHP SG13G2 Schottky Diode (schottky_nbl1) Parameters.
 
-    For schottky_nbl1 and ESD protection diodes.
+    The model's own (the kit's and the open PDK's): an array of Nx by Ny anodes of length l and
+    width w.
 
     Attributes:
-        area: Diode area in square microns. Default is 1.0.
-        pj: Junction perimeter in microns. Default is 4.0.
+        l: Anode length. Default is 1µm.
+        w: Anode width. Default is 0.3µm.
+        Nx: Number of anodes in X. Default is 1.
+        Ny: Number of anodes in Y. Default is 1.
         m: Multiplier. Default is 1.
     """
 
-    area = h.Param(dtype=h.Scalar, desc="Area in µm²", default=1.0)
-    pj = h.Param(dtype=h.Scalar, desc="Junction perimeter in µm", default=4.0)
+    l = h.Param(dtype=h.Scalar, desc="Anode length", default=1 * µ)
+    w = h.Param(dtype=h.Scalar, desc="Anode width", default=0.3 * µ)
+    Nx = h.Param(dtype=h.Scalar, desc="Number of anodes in X", default=1)
+    Ny = h.Param(dtype=h.Scalar, desc="Number of anodes in Y", default=1)
     m = h.Param(dtype=h.Scalar, desc="Multiplier", default=1)
 
 

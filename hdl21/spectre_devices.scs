@@ -1,0 +1,24 @@
+// The package's device names (the IHP open PDK's, pdk_data and prim_dicts) that the Cadence kit
+// names otherwise, for Spectre: each one the kit's device, pins in the package's order. Include
+// after the model libraries.
+simulator lang=spectre
+
+subckt rsil (p n b)
+parameters w=0.5u l=0.5u
+    R0 (p n b) res_rsil w=w l=l
+ends rsil
+
+subckt rhigh (p n b)
+parameters w=0.5u l=0.96u
+    R0 (p n b) res_rhigh w=w l=l
+ends rhigh
+
+subckt rppd (p n b)
+parameters w=0.5u l=0.5u
+    R0 (p n b) res_rppd w=w l=l
+ends rppd
+
+subckt schottky_nbl1 (a c s)
+parameters l=1u w=0.3u Nx=1 Ny=1
+    D0 (a c s) dschottky_nbl1 l=l w=w Nx=Nx Ny=Ny
+ends schottky_nbl1

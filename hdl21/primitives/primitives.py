@@ -11,7 +11,7 @@ Example:
     @h.module
     class MyCircuit:
         vdd, vss, inp, out = h.Ports(4)
-        n = LV_NMOS(IhpMosParams(w=1.0, l=0.13))(d=out, g=inp, s=vss, b=vss)
+        n = LV_NMOS(IhpMosParams(w=1 * µ, l=0.13 * µ))(d=out, g=inp, s=vss, b=vss)
 """
 
 from ..pdk_data import *
