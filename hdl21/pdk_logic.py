@@ -60,6 +60,11 @@ from .primitives.prim_dicts import *
 # cells), in unit widths (default_xtor_size: 350 nm). Generators that place their devices in
 # these cells read this through hdl21.pdk.default() and size every finger in whole units.
 MOS_FINGER_UNITS = {"analog": 6, "logic_n": 2, "logic_p": 3}
+# A MOS capacitor's gate capacitance (gate on its node, source, drain and bulk on a rail; the
+# low-threshold core device in strong inversion, over the last 0.5 V of the core supply), per
+# device one unit wide and one minimum length long, in fF, by type: generators size their MOS
+# capacitors by it (flow.circuit.devices.mos_cap).
+MOS_CAP_FF = {"n": 0.567, "p": 0.556}
 
 
 @dataclass

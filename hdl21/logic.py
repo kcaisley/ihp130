@@ -1,4 +1,4 @@
-"""The generic logic cells (flow/comp/subckt.py) and clock XOR (flow/capdriver/subckt.py) as SG13G2 standard cells."""
+"""The generic logic cells (flow/circuit/devices.py) and clock XOR (flow/capdriver/subckt.py) as SG13G2 standard cells."""
 
 import hdl21 as h
 
