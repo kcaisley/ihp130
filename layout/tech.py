@@ -162,7 +162,7 @@ RES = {
 # FMOM capacitance per (style, stacked metals): rows (plate spacing nm, slope fF/um, intercept
 # fF), C = slope * L + intercept, each from the layout-only 3D extraction (Calibre xACT) of the test
 # structures at that spacing (flow/momcap, momcap_characterization 20261018_acc1, field-solver accuracy 1); generators
-# interpolate in 1 / spacing at the spacing they draw (flow.caparray.layout.mom_array_params)
+# interpolate in 1 / spacing at the spacing they draw (flow.cdac.caparray.layout.mom_array_params)
 MOM_MODEL = {
     ("difference", 1): ((210, 0.2306, 0.0746), (315, 0.1592, 0.0705), (420, 0.1276, 0.0701), (630, 0.0876, 0.0749)),
     ("difference", 2): ((210, 0.485, 0.1753), (315, 0.3391, 0.1631), (420, 0.2742, 0.1642), (630, 0.191, 0.1638)),
