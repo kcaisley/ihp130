@@ -45,6 +45,9 @@ STD_DRIVE = r"_(\d+)$"  # a cell name's drive strength (flow.circuit.cellmap)
 MFG_GRID = 5  # manufacturing grid
 DBU = 0.001  # um per database unit (1 nm)
 
+# the off-grid router's bar cuts (a cut longer than the rule's square) are not legal here: made square
+SQUARE_CUTS = True
+
 # ---- metal and via rules, the whole stack (generators beyond the rows: the caparray), from the
 # tech LEF (openroad/): metal width, space, pitch, area (nm2); via cut (square) and space between
 # cuts. Rules the LEF holds only in tables (enclosures, conditional spacing) are left out.
