@@ -5,8 +5,8 @@ environment variable of the same name.
 
 - ``SG13G2_STDCELL``: the library directory of the IHP open PDK (libs.ref/sg13g2_stdcell);
   without it, this PDK's copy (``openroad/``).
-- ``STEMS_ACCESS``: the cells' pin access points, written by ``stdcell_access.py`` into the
-  superproject's ``build/layout/stems/``.
+- ``ROWS_ACCESS``: the cells' pin access points, written by ``stdcell_access.py`` into the
+  superproject's ``build/layout/rows/``.
 """
 
 import os
@@ -27,5 +27,5 @@ else:
 # flow.circuit.cellmap reads for the hdl21 cell library
 STD_LIBERTY = _COPY / "lib/sg13g2_stdcell_typ_1p20V_25C.lib.gz"
 ACCESS_JSON = Path(
-    os.environ.get("STEMS_ACCESS", Path(__file__).resolve().parents[3] / "build/layout/stems/sg13g2_access.json")
+    os.environ.get("ROWS_ACCESS", Path(__file__).resolve().parents[3] / "build/layout/rows/sg13g2_access.json")
 )

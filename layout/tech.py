@@ -1,4 +1,4 @@
-"""IHP SG13G2 values for the row cells (flow/layout/stems), all in nm.
+"""IHP SG13G2 values for the row cells (flow/layout/rows), all in nm.
 
 The generic cells import this module as ``tech``, so this directory goes on the path ahead of
 theirs. Rule values are SG13G2's (SG13G2_os_layout_rules.pdf, rule names in the comments); row
@@ -37,7 +37,6 @@ LAYERS = {
     "TEXT": (63, 0),
     **{f"M{n}.PIN": (m, 2) for n, m in enumerate((8, 10, 30, 50, 67, 126, 134), 1)},  # Metal<n>.pin
 }
-LAYER_NAMES = {f"M{n}": f"Metal{n}" for n in range(1, 6)}  # the layer map's names (the hosted laygo server's)
 PIN_TEXT = {"M1": (8, 25), "M2": (10, 25), "M3": (30, 25)}  # Metal<n>.text: pin labels
 MODELS = {"n": "sg13_lv_nmos", "p": "sg13_lv_pmos"}  # LVS device names of the row transistors
 STD_LIB = "sg13g2_stdcell"  # the standard-cell library
@@ -103,6 +102,9 @@ SD_TRACKS = {"n": (840, 1260, 1680, 2100), "p": (2940, 2520, 2100, 1680)}  # S/D
 # NMOS: 300 nm from the tap pSD (pSD.j), gate contact 140 nm from the diffusion (Cnt.e);
 # PMOS: gate 300 nm inside pSD (pSD.i), 670 nm inside the well (NW.c 310)
 OD_LIMIT = {"n": (480, 2720), "p": (1060, 3300)}  # (OD start at the rail side, furthest OD edge)
+# the complementary row cells' diffusion bands (rowcell.inverter), the library inverters':
+# the NMOS's (lowest bottom, top), the PMOS's (bottom, highest top)
+LOGIC_OD = {"n": (590, 1330), "p": (2060, 3180)}
 W_MAX = 2240  # widest finger
 EDGE = 310  # OD to the cell edge: NW.c / NW.d against any neighbour's well, pSD.j against its pSD
 OD_GAP = 210  # diffusion break between a pair's devices that share no strip (Act.b)
@@ -133,25 +135,19 @@ PO_BAR_END = 150  # poly bar past its outer gates (CO / 2 + Cnt.d)
 SHORT_L = 400  # shorter gates leave room for the gate pads beside the S/D contacts (M1.b)
 M1_EDGE, M2_EDGE, M3_EDGE = 90, 105, 240  # bars kept from the cell edge
 ALIGN_ROUTER = "hanan"  # ALIGN's router: its default (astar) leaves long nets across these rows open
-LAYGO_CLEAR = 210  # laygo: a bar's end to a pin bar booked END wider (Mn.b)
-LAYGO_LINE_END = False  # no dense line-end rule
-LAYGO_GAP3 = 500  # laygo: M3 segments booked by their via centres, drawn BAR_END further: 2 BAR_END + Mn.b
 
 # the metals a fringe MOM capacitor stacks (flow/momcap), from the top: the upper uniform thin
 # metals at their minimum width and space; an N-layer unit uses the top N, its shield the metal
 # below them
 MOM_LAYERS = (3, 4, 5)
 
-# the unsilicided P+ poly resistor rppd (flow/layout/stems/rescell.py): its LVS device (PolyRes,
+# the unsilicided P+ poly resistor rppd (flow/layout/rows/rescell.py): its LVS device (PolyRes,
 # pSD and SalBlock over GatPoly) and model (rsh 260, weff = w + 6 nm, rz 35 ohm um per head); Rppd.a
 # (width); PolyRes marks the body, SalBlock the body and 0.2 past the poly across it (Sal.c), the
 # contacts 0.2 from it (Sal.d), EXTBlock over the whole resistor as its pSD (PolyRes and EXTBlock
 # mark the device), as the kit's own LVS test layouts; pSD past the resistor (pSD.n, Rppd.b); Cnt.d
 RES = {
     "model": "rppd",
-    "sheet": 260.0,
-    "dw": -6,
-    "end": 70.0,
     "width": 500,
     "markers": {"SALBLOCK": (0, 200), "POLYRES": (0, 0), "EXTBLOCK": (630, 200)},
     "implant": ("PP", 200),

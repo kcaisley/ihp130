@@ -1,0 +1,36 @@
+{
+ "provenance": {
+  "pdk": "ihp130",
+  "kind": "moscap",
+  "corner": "TYPICAL",
+  "temperature_c": 25,
+  "method": "Spectre AC in inversion",
+  "code_sha": "8e5cb610553c",
+  "date": "2026-11-03"
+ },
+ "vdd_v": 1.2,
+ "swing_v": 0.5,
+ "cap_l": 8,
+ "unit": {
+  "w_m": 3.5e-07,
+  "l_m": 1.3e-07
+ },
+ "devices": {
+  "NMOS/STD": {
+   "ff_per_unit": 4.554318157670698,
+   "ff_per_um2": 12.511863070523896
+  },
+  "NMOS/LOW": {
+   "ff_per_unit": 4.554318157670698,
+   "ff_per_um2": 12.511863070523896
+  },
+  "PMOS/STD": {
+   "ff_per_unit": 4.44610259511327,
+   "ff_per_um2": 12.214567568992502
+  },
+  "PMOS/LOW": {
+   "ff_per_unit": 4.44610259511327,
+   "ff_per_um2": 12.214567568992502
+  }
+ }
+}

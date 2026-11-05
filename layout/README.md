@@ -1,18 +1,18 @@
 # Layout (IHP SG13G2)
 
 The PDK's layout description, shared by every generator and layout tool: the layers, the metal and
-via rules, and the values of the stems row cells (cells one standard-cell row tall, sg13g2_stdcell), so
+via rules, and the values of the row cells (cells one standard-cell row tall, sg13g2_stdcell), so
 analog blocks place like digital logic and share rows, rails and wells with the library. The
-generators themselves know no PDK: the stems engine and the cIcCreator, laygo and ALIGN drivers
+generators themselves know no PDK: the row engine and the ALIGN driver
 are in `flow/layout/`, and everything they generate goes to the superproject's `build/layout/`.
 
 | Module | Contents |
 | --- | --- |
-| `tech.py` | layers (`LAYERS`), DBU and grid, metal and via rules (`RULES`), and the row profile and rule values the stems engine draws with |
+| `tech.py` | layers (`LAYERS`), DBU and grid, metal and via rules (`RULES`), and the row profile and rule values the row engine draws with |
 | `paths.py` | library and access-point locations |
 | `netlists/` | the PDK's hand-written test netlists (`mos_inv.sp`, the single-device test) |
 
-## Row profile (the stems row cells)
+## Row profile (the row cells)
 
 nm, cell frame R0 (VSS at the bottom), from `tech.py`:
 
@@ -27,5 +27,4 @@ half width `RAIL` = 220, widest finger `W_MAX` = 2240; MOS models sg13_lv_nmos /
 
 ## Notes
 
-- The laygo server works in this PDK's layer numbers and names; `flow/layout/laygo/post.py` maps them back to the target PDK.
 - MOS fingers are `ng` in the models.
