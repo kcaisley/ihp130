@@ -161,7 +161,7 @@ RES = {
 # FMOM capacitance per (style, stacked metals): rows (plate spacing nm, slope fF/um, intercept
 # fF), C = slope * L + intercept, each from the layout-only 3D extraction (Calibre xACT) of the test
 # structures at that spacing (flow/momcap, momcap_characterization 20261018_acc1, field-solver accuracy 1); generators
-# interpolate in 1 / spacing at the spacing they draw (flow.cdac.caparray.layout.mom_array_params)
+# interpolate in 1 / spacing at the spacing they draw
 MOM_MODEL = {
     ("difference", 1): ((210, 0.2306, 0.0746), (315, 0.1592, 0.0705), (420, 0.1276, 0.0701), (630, 0.0876, 0.0749)),
     ("difference", 2): ((210, 0.485, 0.1753), (315, 0.3391, 0.1631), (420, 0.2742, 0.1642), (630, 0.191, 0.1638)),
@@ -176,5 +176,5 @@ MOM_MODEL = {
 
 # the CDAC's capacitance against MOM_MODEL's per stacked-metal count: the median over the stages of
 # the extracted radix-17 array (caparray_extract_all_pdks, 2026-10-18, field-solver accuracy 1) over the model's sizing (its
-# shield mesh couples otherwise than the test structures' solid plate); mom_array_params scales by it
+# shield mesh couples otherwise than the test structures' solid plate); the legacy array generator scaled by it
 MOM_ARRAY_SCALE = {1: 0.9759, 2: 0.9895, 3: 1.0101}

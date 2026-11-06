@@ -374,10 +374,6 @@ class IhpWalker(h.HierarchyWalker):
             from .logic import logic_cell
 
             return logic_cell(call.module.name, call.params)
-        if call.module.domain == "generic" and call.module.name == "clock_xor":
-            from .logic import clock_xor
-
-            return clock_xor(call.params)
         return call
 
     def visit_primitive_call(self, call: h.PrimitiveCall) -> h.Instantiable:
