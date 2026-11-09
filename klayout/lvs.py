@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -44,9 +43,10 @@ def lvs(gds: Path, top: str, source: Path, source_top: str, run_dir: Path) -> tu
         "--combine_devices",
         "--top_lvl_pins",
     ]
-    out = subprocess.run(cmd, capture_output=True, text=True, check=False)
-    (run_dir / "run_lvs.log").write_text(out.stdout + out.stderr)
-    text = out.stdout + out.stderr
+    from flow.logs import run_logged
+
+    # its whole output in run_lvs.log and the flow's log (klayout.lvs), a mismatch not a failure
+    text = run_logged(cmd, cwd=run_dir, log=run_dir / "run_lvs.log", name="klayout.lvs", allowed=tuple(range(256)))
     ok = "Congratulations! Netlists match" in text
     return ok, run_dir / "run_lvs.log"
 
