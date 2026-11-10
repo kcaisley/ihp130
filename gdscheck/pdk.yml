@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: IHP SG13G2 FRIDA precheck
+name: IHP SG13G2 precheck
 version: "1.0"
 
 # A conservative block-level precheck of the metal stack, from the metal and via rules in
