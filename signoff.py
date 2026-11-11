@@ -1,6 +1,6 @@
 """Signoff provider for frida's ``flow/layout/signoff.py``: DRC and LVS of a block in IHP SG13G2.
 
-DRC: the gdscheck precheck (``gdscheck/pdk.yml``) where gdscheck is installed, then the IHP open
+DRC: the gdscheck precheck (``gdscheck/drc.yaml``) where gdscheck is installed, then the IHP open
 PDK's KLayout deck without density (``klayout/drc.py``). LVS: its KLayout deck (``klayout/lvs.py``).
 Both need a full IHP-Open-PDK checkout (``IHP_OPEN_PDK``). The checkers run in ``drc/`` and ``lvs/``
 under the run directory. No PEX here.
@@ -19,7 +19,7 @@ from klayout import rdb
 from pdk.ihp130.klayout.drc import drc
 from pdk.ihp130.klayout.lvs import lvs
 
-PRECHECK = Path(__file__).resolve().parent / "gdscheck" / "pdk.yml"
+PRECHECK = Path(__file__).resolve().parent / "gdscheck" / "drc.yaml"
 
 
 def _gdscheck(gds_path: Path, layout_top: str, run_dir: Path) -> dict[str, int]:
