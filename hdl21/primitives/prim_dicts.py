@@ -1,14 +1,8 @@
-"""
-Device dictionaries for IHP SG13G2 130nm BiCMOS PDK.
+"""Primitive dictionaries for IHP SG13G2: the ExternalModules the compile pass maps Hdl21's
+primitives to, by device, the standard cells, the call cache and the default device sizes."""
 
-These dictionaries map Hdl21 primitive parameters to IHP-specific
-ExternalModule instances representing the actual PDK devices.
-"""
-
-# Std-Lib Imports
 from dataclasses import dataclass, field
 
-# Hdl21 Imports
 import hdl21 as h
 from hdl21.prefix import µ
 from hdl21.primitives import (
@@ -22,8 +16,25 @@ from hdl21.primitives import (
     PhysicalResistorParams,
 )
 
-# Local Imports
-from ..pdk_data import *
+from ..cells import CELLS
+from ..pdk_data import (
+    IhpCapParams,
+    IhpDiodeParams,
+    IhpEsdParams,
+    IhpHbtParams,
+    IhpPnpParams,
+    IhpResParams,
+    IhpVaricapParams,
+    cap_module,
+    esd_module,
+    hbt_module,
+    logic_module,
+    pnp_module,
+    res_module,
+    schottky_module,
+    varicap_module,
+    xtor_module,
+)
 
 # MOS transistor key: (name, MosType, MosVth, MosFamily)
 MosKey = tuple[str, MosType, MosVth, MosFamily]
@@ -35,13 +46,13 @@ MosKey = tuple[str, MosType, MosVth, MosFamily]
 
 xtors: dict[MosKey, h.ExternalModule] = {
     # Low-voltage NMOS (1.2V core)
-    ("LV_NMOS", MosType.NMOS, MosVth.STD, MosFamily.CORE): xtor_module("sg13_lv_nmos", params=IhpMosParams),
+    ("LV_NMOS", MosType.NMOS, MosVth.STD, MosFamily.CORE): xtor_module("sg13_lv_nmos"),
     # Low-voltage PMOS (1.2V core)
-    ("LV_PMOS", MosType.PMOS, MosVth.STD, MosFamily.CORE): xtor_module("sg13_lv_pmos", params=IhpMosParams),
+    ("LV_PMOS", MosType.PMOS, MosVth.STD, MosFamily.CORE): xtor_module("sg13_lv_pmos"),
     # High-voltage NMOS (3.3V I/O)
-    ("HV_NMOS", MosType.NMOS, MosVth.STD, MosFamily.IO): xtor_module("sg13_hv_nmos", params=IhpMosHvParams),
+    ("HV_NMOS", MosType.NMOS, MosVth.STD, MosFamily.IO): xtor_module("sg13_hv_nmos"),
     # High-voltage PMOS (3.3V I/O)
-    ("HV_PMOS", MosType.PMOS, MosVth.STD, MosFamily.IO): xtor_module("sg13_hv_pmos", params=IhpMosHvParams),
+    ("HV_PMOS", MosType.PMOS, MosVth.STD, MosFamily.IO): xtor_module("sg13_hv_pmos"),
 }
 
 # ==== Bipolar Transistors (HBT and PNP) ====
@@ -105,6 +116,13 @@ esd_devices: dict[str, h.ExternalModule] = {
     "diodevdd_4kv": esd_module("diodevdd_4kv", params=IhpEsdParams),
     "diodevss_2kv": esd_module("diodevss_2kv", params=IhpEsdParams),
     "diodevss_4kv": esd_module("diodevss_4kv", params=IhpEsdParams),
+}
+
+# ==== Standard Cells ====
+# every cell of sg13g2_stdcell (cells.py: its pins in SPICE order), by name
+
+stdcells: dict[str, h.ExternalModule] = {
+    name: logic_module(name, "SG13G2 Standard Cell", list(pins)) for name, (pins, _) in CELLS.items()
 }
 
 # ==== Module-Scope Cache ====

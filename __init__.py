@@ -6,7 +6,7 @@ featuring high-performance SiGe HBTs with fT up to 350 GHz.
 
 Usage:
     import hdl21 as h
-    import ihp_hdl21
+    from pdk import ihp130
 
     # Create a module using generic primitives
     @h.module
@@ -16,7 +16,7 @@ Usage:
         n = h.Mos(tp=h.MosType.NMOS)(g=inp, d=out, s=vss, b=vss)
 
     # Compile to IHP technology
-    ihp_hdl21.compile(MyInverter)
+    ihp130.compile(MyInverter)
 """
 
 from hdl21.pdk import register

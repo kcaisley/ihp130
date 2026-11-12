@@ -1,12 +1,7 @@
-"""
-IHP SG13G2 Primitive Device Definitions
-
-This module provides direct access to IHP PDK devices as ExternalModules.
-Use these for explicit device instantiation when you need full control
-over the device type, bypassing the automatic primitive conversion.
+"""IHP SG13G2's devices for direct instantiation: the device dictionaries, and each device by name.
 
 Example:
-    from ihp_hdl21.primitives import LV_NMOS, NPN13G2
+    from pdk.ihp130.hdl21.primitives.primitives import LV_NMOS
 
     @h.module
     class MyCircuit:
@@ -14,66 +9,70 @@ Example:
         n = LV_NMOS(IhpMosParams(w=1 * µ, l=0.13 * µ))(d=out, g=inp, s=vss, b=vss)
 """
 
-from ..pdk_data import *
+from hdl21.primitives import MosFamily, MosType, MosVth
+
+from .prim_dicts import bjts, caps, diodes, esd_devices, ress, stdcells, varicaps, xtors
+
+__all__ = ["bjts", "caps", "diodes", "ress", "stdcells", "xtors"]
 
 # ==== MOS Transistors ====
 
 # Low-voltage (1.2V core) transistors - min L = 0.13µm
-LV_NMOS = xtor_module("sg13_lv_nmos", params=IhpMosParams)
-LV_PMOS = xtor_module("sg13_lv_pmos", params=IhpMosParams)
+LV_NMOS = xtors["LV_NMOS", MosType.NMOS, MosVth.STD, MosFamily.CORE]
+LV_PMOS = xtors["LV_PMOS", MosType.PMOS, MosVth.STD, MosFamily.CORE]
 
 # High-voltage (3.3V I/O) transistors - min L = 0.45µm
-HV_NMOS = xtor_module("sg13_hv_nmos", params=IhpMosHvParams)
-HV_PMOS = xtor_module("sg13_hv_pmos", params=IhpMosHvParams)
+HV_NMOS = xtors["HV_NMOS", MosType.NMOS, MosVth.STD, MosFamily.IO]
+HV_PMOS = xtors["HV_PMOS", MosType.PMOS, MosVth.STD, MosFamily.IO]
 
 # ==== Bipolar Transistors - HBT ====
 # High-performance HBTs with fT up to 350 GHz, fmax up to 450 GHz
 
 # Standard 4-terminal HBTs (c, b, e, bn)
-NPN13G2 = hbt_module("npn13G2", params=IhpHbtParams, num_terminals=4)
-NPN13G2L = hbt_module("npn13G2l", params=IhpHbtParams, num_terminals=4)
-NPN13G2V = hbt_module("npn13G2v", params=IhpHbtParams, num_terminals=4)
+NPN13G2 = bjts["npn13G2"]
+NPN13G2L = bjts["npn13G2l"]
+NPN13G2V = bjts["npn13G2v"]
 
 # 5-terminal HBT variants (c, b, e, bn, t)
-NPN13G2_5T = hbt_module("npn13G2_5t", params=IhpHbtParams, num_terminals=5)
-NPN13G2L_5T = hbt_module("npn13G2l_5t", params=IhpHbtParams, num_terminals=5)
-NPN13G2V_5T = hbt_module("npn13G2v_5t", params=IhpHbtParams, num_terminals=5)
+NPN13G2_5T = bjts["npn13G2_5t"]
+NPN13G2L_5T = bjts["npn13G2l_5t"]
+NPN13G2V_5T = bjts["npn13G2v_5t"]
 
 # ==== Bipolar Transistors - Lateral PNP ====
 
 # Lateral PNP transistor (3-terminal: c, b, e)
-PNPMPA = pnp_module("pnpMPA", params=IhpPnpParams)
+PNPMPA = bjts["pnpMPA"]
 
 # ==== Resistors (3-Terminal with Bulk Connection) ====
 
 # Silicided polysilicon resistor (~7 ohm/sq)
-RSIL = res_module("rsil", numterminals=3, params=IhpResParams)
+RSIL = ress["rsil"]
 
 # High-resistivity polysilicon resistor (~1k ohm/sq)
-RHIGH = res_module("rhigh", numterminals=3, params=IhpResParams)
+RHIGH = ress["rhigh"]
 
 # P-doped polysilicon resistor (~300 ohm/sq)
-RPPD = res_module("rppd", numterminals=3, params=IhpResParams)
+RPPD = ress["rppd"]
 
 # ==== Capacitors ====
 
 # MIM capacitor (2-terminal: PLUS, MINUS)
-CAP_CMIM = cap_module("cap_cmim", numterminals=2, params=IhpCapParams)
+CAP_CMIM = caps["cap_cmim"]
 
 # RF MIM capacitor (3-terminal: PLUS, MINUS, bn)
-CAP_RFCMIM = cap_module("cap_rfcmim", numterminals=3, params=IhpCapParams)
+CAP_RFCMIM = caps["cap_rfcmim"]
 
 # Varactor (4-terminal: G1, W, G2, bn)
-SVARICAP = varicap_module("sg13_hv_svaricap", params=IhpVaricapParams)
+SVARICAP = varicaps["sg13_hv_svaricap"]
 
 # ==== Diodes ====
 
 # Schottky diode (3-terminal: A, C, S)
-SCHOTTKY_NBL1 = schottky_module("schottky_nbl1", params=IhpDiodeParams)
+SCHOTTKY_NBL1 = diodes["schottky_nbl1"]
 
 # ==== ESD Protection Devices (3-Terminal: VDD, PAD, VSS) ====
 
-DIODEVDD_2KV = esd_module("diodevdd_2kv", params=IhpEsdParams)
-DIODEVDD_4KV = esd_module("diodevdd_4kv", params=IhpEsdParams)
-DIODEVSS_2KV = esd_module("diodevss_2kv", params=IhpEsdParams)
-DIODEVSS_4KV = esd_module("diodevss_4kv", params=IhpEsdParams)
+DIODEVDD_2KV = esd_devices["diodevdd_2kv"]
+DIODEVDD_4KV = esd_devices["diodevdd_4kv"]
+DIODEVSS_2KV = esd_devices["diodevss_2kv"]
+DIODEVSS_4KV = esd_devices["diodevss_4kv"]

@@ -1,17 +1,18 @@
-"""The generic logic cells (flow/circuit/devices.py) as SG13G2 standard cells."""
+"""The generic logic cells (flow/circuit/devices.py) as sg13g2_stdcell cells (1.2 V); every cell of
+the library is in ``primitives.prim_dicts.stdcells``."""
 
 import hdl21 as h
 
-from .digital_cells import stdcells
 from .pdk_data import IhpLogicParams
+from .primitives.prim_dicts import stdcells
 
 # generic logic cell and drive band -> sg13g2 cell (pins: Y output, A / B inputs, VDD, VSS)
 _LOGIC = {
-    ("inverter", 1): stdcells.inv_1,
-    ("inverter", 4): stdcells.inv_4,
-    ("inverter", 8): stdcells.inv_8,
-    ("nor2", 2): stdcells.nor2_2,
-    ("nand2", 1): stdcells.nand2_2,  # nand2_1 is too narrow for three pin accesses
+    ("inverter", 1): stdcells["sg13g2_inv_1"],
+    ("inverter", 4): stdcells["sg13g2_inv_4"],
+    ("inverter", 8): stdcells["sg13g2_inv_8"],
+    ("nor2", 2): stdcells["sg13g2_nor2_2"],
+    ("nand2", 1): stdcells["sg13g2_nand2_2"],  # nand2_1 is too narrow for three pin accesses
 }
 _WRAPPERS: dict[tuple[str, int], h.Module] = {}
 

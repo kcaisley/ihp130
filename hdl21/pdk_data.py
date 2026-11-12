@@ -1,7 +1,12 @@
-# Std-Lib Imports
+"""PDK data definitions for IHP SG13G2: the devices' parameter classes and their ExternalModules.
+
+The process has low-voltage (1.2 V) and high-voltage (3.3 V) CMOS transistors, SiGe HBTs (fT up
+to 350 GHz), polysilicon resistors (rsil, rhigh, rppd), MIM capacitors and varactors, ESD and
+Schottky diodes.
+"""
+
 from copy import deepcopy
 
-# Hdl21 Imports
 import hdl21 as h
 from hdl21.prefix import µ
 from hdl21.primitives import (
@@ -12,22 +17,9 @@ from hdl21.primitives import (
     ThreeTerminalCapacitor,
     ThreeTerminalResistor,
 )
-
-# Vlsirtool Types to ease downstream parsing
 from vlsirtools import SpiceType
 
 PDK_NAME = "ihp"
-
-"""
-Parameter classes for IHP SG13G2 130nm BiCMOS PDK devices.
-
-This PDK features:
-- Low-voltage (1.2V) and High-voltage (3.3V) CMOS transistors
-- High-performance SiGe HBTs with fT up to 350 GHz
-- Various resistor types (rsil, rhigh, rppd)
-- MIM capacitors and varactors
-- ESD protection diodes and Schottky diodes
-"""
 
 
 @h.paramclass
@@ -41,7 +33,8 @@ class IhpMosParams:
     Attributes:
         w: Width. Default is 0.35µm (minimum).
         l: Length. Default is 0.13µm (minimum for LV).
-        ng: Number of gate fingers. Default is 1.
+        ng: Number of gate fingers. Default is 1. The models' own name for it (their
+            subcircuits take ``ng``, not the ``nf`` other kits' models take).
         m: Multiplier. Default is 1.
     """
 
@@ -222,31 +215,17 @@ These create ExternalModule instances representing PDK subcircuits.
 """
 
 
-def xtor_module(
-    modname: str,
-    params: h.Param = IhpMosParams,
-    num_terminals: int = 4,
-) -> h.ExternalModule:
-    """Create IHP MOS transistor ExternalModule.
-
-    Args:
-        modname: SPICE subcircuit name (e.g., 'sg13_lv_nmos')
-        params: Parameter class for this device
-        num_terminals: Number of terminals (4 for standard MOS)
-
-    Returns:
-        ExternalModule representing the MOS device
-    """
-    # Standard 4-terminal MOS port list: d, g, s, b
-    mod = h.ExternalModule(
+def xtor_module(modname: str) -> h.ExternalModule:
+    """A MOS ExternalModule (d, g, s, b): ``modname`` the model's subcircuit (``sg13_lv_nmos``),
+    its parameters the high-voltage devices' (``sg13_hv_*``) or the low-voltage ones'."""
+    return h.ExternalModule(
         domain=PDK_NAME,
         name=modname,
         desc=f"{PDK_NAME} PDK MOS {modname}",
         port_list=deepcopy(h.Mos.port_list),
-        paramtype=params,
+        paramtype=IhpMosHvParams if modname.startswith("sg13_hv_") else IhpMosParams,
         spicetype=SpiceType.SUBCKT,
     )
-    return mod
 
 
 # 4-terminal HBT port list: c, b, e, bn (base node/substrate)

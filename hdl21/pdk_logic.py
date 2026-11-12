@@ -21,7 +21,7 @@ Target devices for conversion from `hdl21.Primitive`:
 
 # Std-Lib Imports
 from pathlib import Path
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
 # Hdl21 Imports
 import hdl21 as h
@@ -54,12 +54,27 @@ from .pdk_data import (
     IhpPnpParams,
     IhpResParams,
 )
-from .primitives.prim_dicts import *
+from .primitives.prim_dicts import (
+    CACHE,
+    bjts,
+    caps,
+    default_cap_size,
+    default_res_size,
+    default_xtor_size,
+    diodes,
+    esd_devices,
+    ress,
+    varicaps,
+    xtors,
+)
 
 # The widest MOS finger each row-cell type fits (pdk/ihp130/layout/tech.py: W_MAX for the analog
 # cells), in unit widths (default_xtor_size: 350 nm). Generators that place their devices in
 # these cells read this through hdl21.pdk.default() and size every finger in whole units.
 MOS_FINGER_UNITS = {"analog": 6, "logic_n": 2, "logic_p": 3}
+
+# each model's default (w, l): the MOS, resistors' and capacitors' (their names are distinct)
+_DEFAULT_SIZE = {**default_xtor_size, **default_res_size, **default_cap_size}
 
 
 @dataclass
@@ -73,15 +88,17 @@ class Install(PdkInstallation):
 
     Attributes:
         pdk_path: Path to the Cadence kit (IHP-SG13G2), whose models Spectre reads.
-        model_lib: Relative path to the low-voltage MOS Spectre models.
+        stdcell_path: The standard cells' SPICE (Spectre's), separate from the model libraries.
         open_pdk_path: Path to an IHP-Open-PDK checkout, whose models and standard-cell netlist
             ngspice reads.
         osdi_path: Directory of the open PDK's Verilog-A models (psp103, psp103_nqs, r3_cmc,
             mosvar) compiled for ngspice (OpenVAF).
+
+    The kit's Spectre models and the open PDK's ngspice ones are two installs, hence the last two.
     """
 
     pdk_path: Path  # Path to PDK installation (IHP-SG13G2)
-    model_lib: Path = Path("SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2")
+    stdcell_path: Path | None = None  # Unsectioned standard-cell SPICE, separate from model libraries.
     open_pdk_path: Path | None = None
     osdi_path: Path | None = None
 
@@ -97,9 +114,11 @@ class Install(PdkInstallation):
     ]
 
     def include_stdcell(self) -> h.sim.Include:
-        """Include the sg13g2 standard cells' SPICE (this package's copy, which the row cells draw
-        from); transistor models must be included separately."""
-        return h.sim.Include(path=Path(__file__).resolve().parents[1] / "openroad/sp/sg13g2_stdcell.sp")
+        """Include the sg13g2 standard cells' SPICE (the site's: this package's copy, which the row
+        cells draw from); transistor models must be included separately."""
+        if self.stdcell_path is None:
+            raise ValueError("IHP SG13G2 standard-cell library path is not configured")
+        return h.sim.Include(path=self.stdcell_path)
 
     # what the site's model decks do not model, per simulator: a device, or "cells", and why
     # (pdk/test_spice.py)
@@ -199,7 +218,7 @@ class Install(PdkInstallation):
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerMOSlv_psp.scs",
+            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2/cornerMOSlv_psp.scs",
             section=corner_map[corner],
         )
 
@@ -222,7 +241,7 @@ class Install(PdkInstallation):
             raise ValueError(f"Invalid corner {corner}")
 
         return h.sim.Lib(
-            path=self.pdk_path / self.model_lib / "cornerMOShv_psp.scs",
+            path=self.pdk_path / "SG13G2_618_rev1.2.10/tech/SG13_MOS/library/spectreG2/cornerMOShv_psp.scs",
             section=corner_map[corner],
         )
 
@@ -329,20 +348,6 @@ class Install(PdkInstallation):
         """
         return self.include_mos_lv(corner)
 
-    singleton: Optional["Install"] = None
-
-    @classmethod
-    def instance(cls) -> "Install":
-        """Get the singleton Install instance."""
-        if cls.singleton is None:
-            raise ValueError("The Install instance has not been initialized yet.")
-        return cls.singleton
-
-    def __post_init__(self):
-        if Install.singleton is not None:
-            raise ValueError("The Install instance has already been initialized.")
-        Install.singleton = self
-
 
 class IhpWalker(h.HierarchyWalker):
     """
@@ -351,15 +356,6 @@ class IhpWalker(h.HierarchyWalker):
     Converts `h.Primitive` instances to process-defined `ExternalModule`s
     during circuit compilation.
     """
-
-    def __init__(self):
-        super().__init__()
-        # Caches of our external module calls
-        self.mos_modcalls = {}
-        self.res_modcalls = {}
-        self.cap_modcalls = {}
-        self.diode_modcalls = {}
-        self.bjt_modcalls = {}
 
     def visit_external_module_call(self, call: h.ExternalModuleCall) -> h.Instantiable:
         """Generic logic cells (inverter, nor2, nand2) and the clock XOR become SG13G2 standard cells."""
@@ -371,7 +367,7 @@ class IhpWalker(h.HierarchyWalker):
         if wrapper is not None:
             return wrapper
         if call.module.domain == "generic" and call.module.name in ("inverter", "nor2", "nand2"):
-            from .logic import logic_cell
+            from .stdcells import logic_cell
 
             return logic_cell(call.module.name, call.params)
         return call
@@ -440,6 +436,20 @@ class IhpWalker(h.HierarchyWalker):
         # Return the first match
         return next(iter(subset.values()))
 
+    def mos_params(self, params: MosParams, modname: str):
+        """The model's parameters for ``params``: the high-voltage devices' (``sg13_hv_*``) or the
+        low-voltage ones', ``nf`` as the models' ``ng``."""
+
+        w, l = self.use_defaults(params, modname)
+        paramtype = IhpMosHvParams if "hv" in modname else IhpMosParams
+        defaults = paramtype.default_instance()
+        return paramtype(
+            w=w,
+            l=l,
+            ng=params.nf or defaults.ng,
+            m=params.mult or defaults.m,
+        )
+
     def mos_module_call(self, params: MosParams) -> h.ExternalModuleCall:
         """Retrieve or create a `Call` for MOS parameters `params`."""
 
@@ -447,29 +457,9 @@ class IhpWalker(h.HierarchyWalker):
         if params in CACHE.mos_modcalls:
             return CACHE.mos_modcalls[params]
 
-        # Get the ExternalModule
+        # Get the ExternalModule and its parameters
         mod = self.mos_module(params)
-
-        # Get default sizes
-        w, l = self.use_defaults(params, mod.name, default_xtor_size)
-
-        # Select appropriate parameter class based on device type
-        if "hv" in mod.name:
-            defaults = IhpMosHvParams.default_instance()
-            modparams = IhpMosHvParams(
-                w=w,
-                l=l,
-                ng=params.nf or defaults.ng,
-                m=params.mult or defaults.m,
-            )
-        else:
-            defaults = IhpMosParams.default_instance()
-            modparams = IhpMosParams(
-                w=w,
-                l=l,
-                ng=params.nf or defaults.ng,
-                m=params.mult or defaults.m,
-            )
+        modparams = self.mos_params(params, mod.name)
 
         # Create call, cache, and return
         modcall = mod(modparams)
@@ -492,7 +482,7 @@ class IhpWalker(h.HierarchyWalker):
             return CACHE.res_modcalls[params]
 
         mod = self.res_module(params)
-        w, l = self.use_defaults(params, mod.name, default_res_size)
+        w, l = self.use_defaults(params, mod.name)
 
         # PhysicalResistorParams doesn't have mult, so default to 1
         modparams = IhpResParams(w=w, l=l, m=1)
@@ -520,7 +510,7 @@ class IhpWalker(h.HierarchyWalker):
             return CACHE.cap_modcalls[params]
 
         mod = self.cap_module(params)
-        w, l = self.use_defaults(params, mod.name, default_cap_size)
+        w, l = self.use_defaults(params, mod.name)
 
         defaults = IhpCapParams.default_instance()
         m = int(params.mult) if params.mult is not None else defaults.m
@@ -629,18 +619,11 @@ class IhpWalker(h.HierarchyWalker):
             return h.Literal(f"({orig.text} * {default.number}e{default.prefix.value})")
         raise TypeError(f"Param Value {orig}")
 
-    def use_defaults(
-        self,
-        params: h.paramclass,
-        modname: str,
-        defaults: dict[str, tuple[h.Prefixed, h.Prefixed]],
-    ) -> tuple[h.Scalar, h.Scalar]:
-        """Get width and length, scaling unitless values by model defaults."""
+    def use_defaults(self, params: h.paramclass, modname: str) -> tuple[h.Scalar, h.Scalar]:
+        """Get width and length, scaling unitless values by the model's default size (MOS,
+        resistor or capacitor; ``sg13_lv_nmos``'s for a model without one)."""
 
-        default_pair = defaults.get(modname)
-        if default_pair is None:
-            default_pair = next(iter(defaults.values()))
-        w0, l0 = default_pair
+        w0, l0 = _DEFAULT_SIZE.get(modname, default_xtor_size["sg13_lv_nmos"])
 
         w = self.scale_param(getattr(params, "w", None), w0)
         l = self.scale_param(getattr(params, "l", None), l0)

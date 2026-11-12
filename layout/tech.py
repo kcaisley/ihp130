@@ -157,24 +157,3 @@ RES = {
     "bulk": True,  # the model's third terminal, the substrate
     "sim_model": "res_rppd",  # the simulation library's name for it  # as the deck's own test netlists
 }
-
-# FMOM capacitance per (style, stacked metals): rows (plate spacing nm, slope fF/um, intercept
-# fF), C = slope * L + intercept, each from the layout-only 3D extraction (Calibre xACT) of the test
-# structures at that spacing (flow/momcap, momcap_characterization 20261018_acc1, field-solver accuracy 1); generators
-# interpolate in 1 / spacing at the spacing they draw
-MOM_MODEL = {
-    ("difference", 1): ((210, 0.2306, 0.0746), (315, 0.1592, 0.0705), (420, 0.1276, 0.0701), (630, 0.0876, 0.0749)),
-    ("difference", 2): ((210, 0.485, 0.1753), (315, 0.3391, 0.1631), (420, 0.2742, 0.1642), (630, 0.191, 0.1638)),
-    ("difference", 3): ((210, 0.7374, 0.2743), (315, 0.518, 0.2536), (420, 0.4195, 0.2542), (630, 0.2906, 0.2566)),
-    ("ring", 1): ((210, 0.2301, 0.1116), (315, 0.1595, 0.1138), (420, 0.1277, 0.1183), (630, 0.0878, 0.1235)),
-    ("ring", 2): ((210, 0.4852, 0.2447), (315, 0.3393, 0.2525), (420, 0.2753, 0.2517), (630, 0.1917, 0.2698)),
-    ("ring", 3): ((210, 0.7393, 0.3758), (315, 0.5185, 0.3869), (420, 0.4219, 0.3798), (630, 0.2896, 0.4298)),
-    ("strip", 1): ((210, 0.1244, 0.022), (315, 0.0874, 0.0213), (420, 0.0677, 0.0125), (630, 0.0459, 0.0079)),
-    ("strip", 2): ((210, 0.255, 0.0688), (315, 0.1807, 0.0614), (420, 0.1413, 0.0463), (630, 0.0984, 0.0293)),
-    ("strip", 3): ((210, 0.3853, 0.1165), (315, 0.2722, 0.1098), (420, 0.214, 0.0817), (630, 0.1494, 0.0599)),
-}
-
-# the CDAC's capacitance against MOM_MODEL's per stacked-metal count: the median over the stages of
-# the extracted radix-17 array (caparray_extract_all_pdks, 2026-10-18, field-solver accuracy 1) over the model's sizing (its
-# shield mesh couples otherwise than the test structures' solid plate); the legacy array generator scaled by it
-MOM_ARRAY_SCALE = {1: 0.9759, 2: 0.9895, 3: 1.0101}

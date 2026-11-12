@@ -6,6 +6,12 @@ subcircuits of the standard cells it calls.
 from __future__ import annotations
 
 
+def mos(model: str, w_m: float, l_m: float) -> tuple[str, dict[str, float]] | None:
+    """The deck's device for a MOS of ``model`` of total width ``w_m`` and length ``l_m`` (metres):
+    none, as the deck reads each MOS as compiled (its model's own name and parameters)."""
+    return None
+
+
 def _subckts(text: str, names: set[str]) -> list[str]:
     out, keep = [], False
     for line in text.splitlines():
