@@ -319,8 +319,8 @@
       "WidthY": 190,
       "VencA_L": 50,
       "VencA_H": 50,
-      "VencP_L": 0,
-      "VencP_H": 0,
+      "VencP_L": 10,
+      "VencP_H": 10,
       "R": {
         "L_3Sigma": 16,
         "Mean": 20,
@@ -382,8 +382,8 @@
       "WidthY": 190,
       "VencA_L": 50,
       "VencA_H": 50,
-      "VencP_L": 0,
-      "VencP_H": 0,
+      "VencP_L": 10,
+      "VencP_H": 10,
       "R": {
         "L_3Sigma": 16,
         "Mean": 20,

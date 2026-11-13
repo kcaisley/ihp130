@@ -135,6 +135,8 @@ PO_BAR_END = 150  # poly bar past its outer gates (CO / 2 + Cnt.d)
 SHORT_L = 400  # shorter gates leave room for the gate pads beside the S/D contacts (M1.b)
 M1_EDGE, M2_EDGE, M3_EDGE = 90, 105, 240  # bars kept from the cell edge
 ALIGN_ROUTER = "hanan"  # ALIGN's router: its default (astar) leaves long nets across these rows open
+# a block's own: hanan leaves the CDAC's states open past its capacitor array, astar routes them
+ALIGN_ROUTER_BLOCKS = {"capdac": "astar"}
 
 # the metals a fringe MOM capacitor stacks (flow/momcap), from the top: the upper uniform thin
 # metals at their minimum width and space; an N-layer unit uses the top N, its shield the metal
