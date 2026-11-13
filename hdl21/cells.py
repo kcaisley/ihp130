@@ -1,7 +1,7 @@
 """Every cell of sg13g2_stdcell for hdl21 and the generic cells (flow.circuit.cells) it implements.
 
 Written by flow.circuit.cellmap from the library's Liberty and SPICE; do not edit:
-    uv run python -m flow.circuit.cellmap ihp130
+    uv run python -c "from flow.circuit.cellmap import write_library; write_library('ihp130')"
 """
 
 DOMAIN = "ihp130"
@@ -138,3 +138,5 @@ GENERIC = {
     'tiehi_x1': ('sg13g2_tiehi', {'L_HI': 'Y', 'VDD': 'VDD', 'VSS': 'VSS'}, (), ()),
     'tielo_x1': ('sg13g2_tielo', {'L_LO': 'Y', 'VDD': 'VDD', 'VSS': 'VSS'}, (), ()),
 }
+# generic cells the library cannot implement (they stay generic)
+MISSING = ()
