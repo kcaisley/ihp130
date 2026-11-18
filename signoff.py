@@ -16,6 +16,7 @@ from pathlib import Path
 
 from klayout import rdb
 
+from flow.layout.kpex import Engine
 from pdk.ihp130.klayout.drc import drc
 from pdk.ihp130.klayout.lvs import lvs
 
@@ -55,6 +56,15 @@ def _report(run_dir: Path, checker: str, found: dict[str, int], waived: re.Patte
     if violations:
         raise RuntimeError(f"DRC: {len(violations)} rules violated; see {report}")
     return report
+
+
+def engine(block: str) -> Engine:
+    """KLayout-PEX's engine for ``block``'s layouts: the 2.5-D engine for the capacitive DAC, whose
+    MOM arrays FasterCap takes hours on (or does not finish), by ``kpex/parasitics.json``: area and
+    overlap analytic from ``kpex/stack.json``, sidewall, perimeter and side overlap fitted to direct
+    2-D field solves of test cross-sections in it (on capdac within a few percent of FasterCap);
+    FasterCap for every other block."""
+    return Engine.RCX25 if block == "capdac" else Engine.FASTERCAP
 
 
 def run_drc(*, run_dir: Path, gds_path: Path, layout_top: str, options: object = None) -> Path:
