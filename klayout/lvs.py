@@ -2,7 +2,11 @@
 
     uv run python pdk/ihp130/klayout/lvs.py GDS TOP SOURCE SOURCE_TOP RUN_DIR
 
-The deck pairs the top cells by name: the source's top subcircuit is renamed to the layout's.
+The deck pairs the top cells by name: the source's top subcircuit is renamed to the layout's. It
+runs as the deck's own ``run_lvs.py --combine_devices --top_lvl_pins`` does (its switches given to
+KLayout here), from a copy that joins each supply's labelled pieces by name (frida's
+``flow.layout.klayout_lvs.joined_deck``): a block's rail lines are pins of their own, which the
+converter's power grid joins.
 
 The deck: ``$IHP_OPEN_PDK`` (default ~/Documents/libs/IHP-Open-PDK)/ihp-sg13g2/libs.tech/klayout/tech/lvs.
 """
@@ -21,28 +25,43 @@ DECK = (
 
 
 def lvs(gds: Path, top: str, source: Path, source_top: str, run_dir: Path) -> tuple[bool, Path]:
-    if not (DECK / "run_lvs.py").is_file():
+    if not (DECK / "sg13g2.lvs").is_file():
         raise FileNotFoundError(f"no IHP LVS deck at {DECK}: set IHP_OPEN_PDK to a full IHP-Open-PDK checkout")
+    run_dir = Path(run_dir).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
     renamed = run_dir / "source.cdl"
     renamed.write_text(
         re.sub(rf"(?im)^(\.subckt|\.ends)(\s+){re.escape(source_top)}\b", rf"\1\2{top}", source.read_text())
     )
     source = renamed
-    cmd = [
-        "uv",
-        "run",
-        "--with",
-        "docopt",
-        "python",
-        str(DECK / "run_lvs.py"),
-        f"--layout={gds}",
-        f"--netlist={source}",
-        f"--topcell={top}",
-        f"--run_dir={run_dir}",
-        "--combine_devices",
-        "--top_lvl_pins",
-    ]
+    from flow.layout.klayout_lvs import joined_deck
+
+    deck = joined_deck(DECK / "sg13g2.lvs", run_dir / "sg13g2.lvs")
+    stem = Path(gds).name.split(".")[0]
+    switches = {
+        "run_mode": "deep",
+        "no_net_names": "false",
+        "spice_comments": "false",
+        "net_only": "false",
+        "top_lvl_pins": "true",
+        "no_simplify": "false",
+        "no_series_res": "false",
+        "no_parallel_res": "false",
+        "combine_devices": "true",
+        "purge": "false",
+        "purge_nets": "false",
+        "verbose": "false",
+        "topcell": top,
+        "input": str(Path(gds).resolve()),
+        "schematic": str(source.resolve()),
+        "allow_unmatched_ports": "false",
+        "report": str(run_dir / f"{stem}.lvsdb"),
+        "log": str(run_dir / f"{stem}.log"),
+        "target_netlist": str(run_dir / f"{stem}_extracted.cir"),
+    }
+    cmd = ["klayout", "-b", "-r", str(deck)]
+    for key, value in switches.items():
+        cmd += ["-rd", f"{key}={value}"]
     from flow.logs import run_logged
 
     # its whole output in run_lvs.log and the flow's log (klayout.lvs), a mismatch not a failure
