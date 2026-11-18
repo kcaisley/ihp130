@@ -4,9 +4,9 @@
   "kind": "mosfet",
   "corner": "TYPICAL",
   "temperature_c": 25,
-  "method": "Spectre operating point",
-  "code_sha": "c2e0e3ddccbc",
-  "date": "2026-11-02"
+  "method": "Spectre operating point; FO4 inverter chain transient",
+  "code_sha": "42e7846b6a18",
+  "date": "2026-11-18"
  },
  "vdd_v": 1.2,
  "unit": {
@@ -214,5 +214,9 @@
     0.00011466919447714103
    ]
   }
+ },
+ "fo4_delay_s": {
+  "STD": 5.5742452686445344e-11,
+  "LOW": 5.574245268644555e-11
  }
 }
