@@ -90,6 +90,9 @@ IMP_OH, NW_OH = 70, 240  # overhang of the tap pSD band and the N-tap well band 
 STD_CELLS = ("sg13g2_inv_1", "sg13g2_inv_4", "sg13g2_inv_8", "sg13g2_nor2_2", "sg13g2_nand2_2", "sg13g2_fill_1")
 STD_SUPPLY = ("VDD", "VSS")  # supply pin names, VDD rail on top
 STD_FILL, STD_FILL_W = "sg13g2_fill_1", 480  # one-site filler
+# the library's decoupling capacitors, widest first: the cells a top level's filler pass
+# places in a row's gaps before its fillers (OpenROAD's LEF cannot tell a decap from a filler)
+STD_DECAPS = ('sg13g2_decap_8', 'sg13g2_decap_4')
 STD_TEXT_LAYERS: set[int] = set()  # labels sit on the metal layers' text datatype: netcells drops all text
 STD_TRACKS = (1680, 2100, 1260, 2520, 840, 2940)  # pin access tracks, preferred first (middle of the cell)
 STD_WIDE = None  # one VIA1 on any plate (two only above 1.4 um, MINIMUMCUT)
