@@ -156,6 +156,13 @@ ALIGN_ROUTER_BLOCKS = {"capdac": "astar"}
 # below them
 MOM_LAYERS = (3, 4, 5)
 
+# capdac's drivers (flow.capdac.subckt._drive_r_ohm): the kit's settling time constants over the
+# model's (its tables' on- and switching resistances, its FO4 delay), from capdac frida1 at the
+# typical corner (2026-11-20, run 20261120_231204, its main plates sensed): at 1 it settled in 496 ps
+# pre-layout and 588 ps post-layout (KLayout-PEX 2.5-D, its MSB the slowest), so the post-layout
+# over the 500 ps target
+DRIVER_TAU_SCALE = 1.18
+
 # the unsilicided P+ poly resistor rppd (flow/layout/rows/rescell.py): its LVS device (PolyRes,
 # pSD and SalBlock over GatPoly) and model (rsh 260, weff = w + 6 nm, rz 35 ohm um per head); Rppd.a
 # (width); PolyRes marks the body, SalBlock the body and 0.2 past the poly across it (Sal.c), the
