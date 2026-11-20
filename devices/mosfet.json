@@ -5,8 +5,8 @@
   "corner": "TYPICAL",
   "temperature_c": 25,
   "method": "Spectre operating point; FO4 inverter chain transient",
-  "code_sha": "42e7846b6a18",
-  "date": "2026-11-18"
+  "code_sha": "5ad03401037e",
+  "date": "2026-11-20"
  },
  "vdd_v": 1.2,
  "unit": {
@@ -216,7 +216,11 @@
   }
  },
  "fo4_delay_s": {
-  "STD": 5.5742452686445344e-11,
-  "LOW": 5.574245268644555e-11
+  "STD": 5.574241571369439e-11,
+  "LOW": 5.574241571369439e-11
+ },
+ "input_f_per_unit": {
+  "STD": 6.157513001875543e-16,
+  "LOW": 6.157513001875549e-16
  }
 }
