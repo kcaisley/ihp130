@@ -37,7 +37,9 @@ LAYERS = {
     "TEXT": (63, 0),
     **{f"M{n}.PIN": (m, 2) for n, m in enumerate((8, 10, 30, 50, 67, 126, 134), 1)},  # Metal<n>.pin
 }
-PIN_TEXT = {"M1": (8, 25), "M2": (10, 25), "M3": (30, 25)}  # Metal<n>.text: pin labels
+# Metal<n>.text: pin labels (the rows' on M1 to M3; the upper metals' a block's pin landings take,
+# frida's flow.layout.pins)
+PIN_TEXT = {f"M{n}": (m, 25) for n, m in enumerate((8, 10, 30, 50, 67, 126, 134), 1)}
 MODELS = {"n": "sg13_lv_nmos", "p": "sg13_lv_pmos"}  # LVS device names of the row transistors
 STD_LIB = "sg13g2_stdcell"  # the standard-cell library
 STD_DRIVE = r"_(\d+)$"  # a cell name's drive strength (flow.circuit.cellmap)
@@ -66,6 +68,13 @@ RULES = {
     "V6": {"cut": 900, "space": 1060},
     "M7": {"width": 2000, "space": 2000, "pitch": 4000},
 }
+
+# the metals a block's pins land on, lowest first (frida's flow.layout.pins: each landing on the
+# lowest of them its route keeps clear of the block's other nets): the thin metals above the rows'
+# routing (M1 to M3), below the two top metals, whose pitch takes the converter's double-width
+# routes
+PIN_METALS = (4, 5)
+
 NW_SPACE = 620  # NW.b: N-well space, narrower gaps are closed
 
 # ---- the standard-cell row
