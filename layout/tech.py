@@ -76,6 +76,7 @@ RULES = {
 PIN_METALS = (4, 5)
 
 NW_SPACE = 620  # NW.b: N-well space, narrower gaps are closed
+NW_SPACE_NET = 1800  # NW.b1: P-well between N-wells of different nets, a bulk's own well (wellcell)
 
 # ---- the standard-cell row
 H = 3780  # row height; rails at 0 (VSS) and H (VDD)
