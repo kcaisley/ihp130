@@ -51,18 +51,19 @@ SQUARE_CUTS = True
 
 # ---- metal and via rules, the whole stack (generators beyond the rows: the caparray), from the
 # tech LEF (openroad/): metal width, space, pitch, area (nm2); via cut (square) and space between
-# cuts. Rules the LEF holds only in tables (enclosures, conditional spacing) are left out.
+# cuts. Rules the LEF holds only in tables (enclosures) are left out. parallel_space: (space, above
+# width, above parallel run length), the PDK's wide-metal spaces (M1.e, M1.f; Mn.e, Mn.f), which
+# frida's MOM frame keeps from the routing tracks beside it
+_M1_WIDE = ((220, 300, 1000), (600, 10_000, 10_000))  # M1.e, M1.f
+_MN_WIDE = ((240, 390, 1000), (600, 10_000, 10_000))  # Mn.e, Mn.f
+_MN = {"width": 200, "space": 210, "area": 144_000, "enclosed_area": 1_000_000, "parallel_space": _MN_WIDE}
 RULES = {
-    "M1": {"width": 160, "space": 180, "pitch": 420, "area": 90_000},
+    "M1": {"width": 160, "space": 180, "pitch": 420, "area": 90_000, "parallel_space": _M1_WIDE},
     # enclosure: (on two opposite sides, on the other two, on all four), the PDK's via rules (an end
     # cap of 50 nm, 10 nm elsewhere); enclosed_area: the LEF gives none, a conservative 1 um2
     **{f"V{n}": {"cut": 190, "space": 220, "enclosure": (50, 10, 10)} for n in range(1, 5)},
-    **{
-        f"M{n}": {"width": 200, "space": 210, "pitch": 480, "area": 144_000, "enclosed_area": 1_000_000} for n in (2, 4)
-    },
-    **{
-        f"M{n}": {"width": 200, "space": 210, "pitch": 420, "area": 144_000, "enclosed_area": 1_000_000} for n in (3, 5)
-    },
+    **{f"M{n}": {**_MN, "pitch": 480} for n in (2, 4)},
+    **{f"M{n}": {**_MN, "pitch": 420} for n in (3, 5)},
     "V5": {"cut": 420, "space": 420},
     "M6": {"width": 1640, "space": 1640, "pitch": 2280},
     "V6": {"cut": 900, "space": 1060},
